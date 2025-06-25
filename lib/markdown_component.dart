@@ -200,16 +200,24 @@ class HTag extends BlockMd {
   ) {
     var theme = GptMarkdownTheme.of(context);
     var match = this.exp.firstMatch(text.trim());
-    var conf = config.copyWith(
-      style: [
-        theme.h1,
-        theme.h2,
-        theme.h3,
-        theme.h4,
-        theme.h5,
-        theme.h6,
-      ][match![1]!.length - 1]?.copyWith(color: config.style?.color),
+
+    // Get both the default text style and the heading.
+    final defaultTextStyle = config.style ?? DefaultTextStyle.of(context).style;
+    final hTextStyle =
+        [
+          theme.h1,
+          theme.h2,
+          theme.h3,
+          theme.h4,
+          theme.h5,
+          theme.h6,
+        ][match![1]!.length - 1];
+
+    // Now merge the default text style with the heading style.
+    final conf = config.copyWith(
+      style: hTextStyle != null ? defaultTextStyle.merge(hTextStyle) : null,
     );
+
     return config.getRich(
       TextSpan(
         children: [
