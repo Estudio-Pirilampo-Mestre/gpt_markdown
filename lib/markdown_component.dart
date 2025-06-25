@@ -914,7 +914,7 @@ class ImageMd extends InlineMd {
 
     final Widget image;
     if (config.imageBuilder != null) {
-      image = config.imageBuilder!(context, url);
+      image = config.imageBuilder!(context, url, altText);
     } else {
       image = SizedBox(
         width: width,
