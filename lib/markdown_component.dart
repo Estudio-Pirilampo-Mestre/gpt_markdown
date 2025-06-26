@@ -41,46 +41,90 @@ abstract class MarkdownComponent {
         includeGlobalComponents
             ? config.components ?? MarkdownComponent.globalComponents
             : config.inlineComponents ?? MarkdownComponent.inlineComponents;
+
     List<InlineSpan> spans = [];
-    Iterable<String> regexes = components.map<String>((e) => e.exp.pattern);
-    final combinedRegex = RegExp(
-      regexes.join("|"),
-      multiLine: true,
-      dotAll: true,
-    );
-    text.splitMapJoin(
-      combinedRegex,
-      onMatch: (p0) {
-        String element = p0[0] ?? "";
-        for (var each in components) {
-          var p = each.exp.pattern;
-          var exp = RegExp(
-            '^$p\$',
-            multiLine: each.exp.isMultiLine,
-            dotAll: each.exp.isDotAll,
-          );
-          if (exp.hasMatch(element)) {
-            spans.add(each.span(context, element, config));
-            return "";
-          }
+
+    var processedText = text;
+
+    // processedText will be matched to the different components one by one and
+    // the corresponding parts of the text removed from it until there's no
+    // text left to process.
+    while (processedText.isNotEmpty) {
+      var componentsMatched = <MarkdownComponent, SyntaxMatch>{};
+
+      // First find the first match for each component in the processed text.
+      // TODO: Maybe it's possible to create the list of components to use and
+      //  their indices only once, instead of doing it every iteration.
+      for (final each in components) {
+        final match = each.firstMatch(processedText);
+
+        if (match != null) {
+          componentsMatched[each] = match;
         }
-        return "";
-      },
-      onNonMatch: (p0) {
-        if (p0.isEmpty) {
-          return "";
-        }
+      }
+
+      // Now sort the matched components by their start index in the text.
+      MapEntry<MarkdownComponent, SyntaxMatch>? componentToUse =
+          (componentsMatched.entries.toList()
+                ..sort((a, b) => a.value.start.compareTo(b.value.start)))
+              .firstOrNull;
+
+      // If no component matched at the start of the text, we try with
+      // [includeGlobalComponents] set to false, which means we only use the
+      // inline components. If even that fails to match, we just add the
+      // remaining text as a plain text span.
+      if (componentToUse == null || componentToUse.value.start != 0) {
+        final endIndex = componentToUse?.value.start ?? processedText.length;
+
+        // If [includeGlobalComponents] is true, run this method again with only
+        // the substring of the text until the next component match.
+        // Otherwise, just add the plain text span.
         if (includeGlobalComponents) {
-          var newSpans = generate(context, p0, config.copyWith(), false);
-          spans.addAll(newSpans);
-          return "";
+          spans.addAll(
+            generate(
+              context,
+              processedText.substring(0, endIndex),
+              config.copyWith(),
+              false,
+            ),
+          );
+        } else {
+          spans.add(
+            TextSpan(
+              text: processedText.substring(0, endIndex),
+              style: config.style,
+            ),
+          );
         }
-        spans.add(TextSpan(text: p0, style: config.style));
-        return "";
-      },
-    );
+
+        // Remove the processed part of the text.
+        processedText = processedText.substring(endIndex);
+      } else {
+        // If we found a component that matches, we use it to create a span.
+        final component = componentToUse.key;
+        final match = componentToUse.value;
+
+        spans.add(component.span(context, match.text, config));
+        processedText = processedText.substring(match.text.length);
+      }
+    }
 
     return spans;
+  }
+
+  /// Returns the first match that the component can parse in the given text.
+  SyntaxMatch? firstMatch(String text) {
+    final match = exp.firstMatch(text);
+
+    if (match != null) {
+      return SyntaxMatch(
+        text: match[0] ?? "",
+        end: match.end,
+        start: match.start,
+      );
+    }
+
+    return null;
   }
 
   InlineSpan span(
@@ -91,6 +135,20 @@ abstract class MarkdownComponent {
 
   RegExp get exp;
   bool get inline;
+}
+
+/// A class to represent a syntax match in the markdown text.
+class SyntaxMatch {
+  SyntaxMatch({required this.text, required this.end, required this.start});
+
+  /// The end index of the match.
+  final int end;
+
+  /// The start index of the match.
+  final int start;
+
+  /// The matched text.
+  final String text;
 }
 
 /// Inline component
