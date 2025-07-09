@@ -123,5 +123,28 @@ darkTheme: ThemeData(
 ),
 ```
 
+Use `tableBuilder` to customize table rendering:
+
+```dart
+GptMarkdown(
+  markdownText,
+  tableBuilder: (context, tableRows, textStyle, config) {
+    return Table(
+      border: TableBorder.all(
+        width: 1,
+        color: Colors.red,
+      ),
+      children: tableRows.map((e) {
+        return TableRow(
+          children: e.fields.map((e) {
+            return Text(e.data);
+          }).toList(),
+        );
+      }).toList(),
+    );
+  },
+);
+```
+
 Please see the [README.md](https://github.com/Infinitix-LLC/gpt_markdown) and also [example](https://github.com/Infinitix-LLC/gpt_markdown/tree/main/example/lib/main.dart) app for more details.
 

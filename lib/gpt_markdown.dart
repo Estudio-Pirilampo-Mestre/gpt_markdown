@@ -40,6 +40,7 @@ class GptMarkdown extends StatelessWidget {
     this.overflow,
     this.orderedListBuilder,
     this.unOrderedListBuilder,
+    this.tableBuilder,
     this.components,
     this.inlineComponents,
     this.useDollarSignsForLatex = false,
@@ -99,6 +100,9 @@ class GptMarkdown extends StatelessWidget {
 
   /// Whether to use dollar signs for LaTeX.
   final bool useDollarSignsForLatex;
+
+  /// The table builder.
+  final TableBuilder? tableBuilder;
 
   /// The list of components.
   ///  ```dart
@@ -202,6 +206,7 @@ class GptMarkdown extends StatelessWidget {
           unOrderedListBuilder: unOrderedListBuilder,
           components: components,
           inlineComponents: inlineComponents,
+          tableBuilder: tableBuilder,
         ),
       ),
     );

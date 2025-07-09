@@ -13,6 +13,9 @@ class LinkButton extends StatefulWidget {
   /// The text of the link.
   final String text;
 
+  /// The child of the link.
+  final Widget? child;
+
   /// The callback function to be called when the link is pressed.
   final VoidCallback? onPressed;
 
@@ -40,6 +43,7 @@ class LinkButton extends StatefulWidget {
     this.onPressed,
     this.textStyle,
     this.url,
+    this.child,
   });
 
   @override
@@ -65,7 +69,9 @@ class _LinkButtonState extends State<LinkButton> {
         onTapUp: (_) => _handlePress(false),
         onTapCancel: () => _handlePress(false),
         onTap: widget.onPressed,
-        child: widget.config.getRich(TextSpan(text: widget.text, style: style)),
+        child:
+            widget.child ??
+            widget.config.getRich(TextSpan(text: widget.text, style: style)),
       ),
     );
   }

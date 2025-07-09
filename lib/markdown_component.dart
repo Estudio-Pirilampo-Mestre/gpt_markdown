@@ -18,12 +18,13 @@ abstract class MarkdownComponent {
   ];
 
   static final List<MarkdownComponent> inlineComponents = [
-    ImageMd(),
     ATagMd(),
+    ImageMd(),
     TableMd(),
     StrikeMd(),
     BoldMd(),
     ItalicMd(),
+    UnderLineMd(),
     LatexMath(),
     LatexMathMultiLine(),
     HighlightedText(),
@@ -846,7 +847,7 @@ class SourceTag extends InlineMd {
 /// Link text component
 class ATagMd extends InlineMd {
   @override
-  RegExp get exp => RegExp(r"\[[^\[\]]*\]\([^\s]*\)");
+  RegExp get exp => RegExp(r"(?<!\!)\[.*\]\([^\s]*\)");
 
   @override
   InlineSpan span(
@@ -854,14 +855,33 @@ class ATagMd extends InlineMd {
     String text,
     final GptMarkdownConfig config,
   ) {
-    // First try to find the basic pattern
-    final basicMatch = RegExp(r'\[([^\[\]]*)\]\(').firstMatch(text.trim());
-    if (basicMatch == null) {
+    var bracketCount = 0;
+    var start = 1;
+    var end = 0;
+    for (var i = 0; i < text.length; i++) {
+      if (text[i] == '[') {
+        bracketCount++;
+      } else if (text[i] == ']') {
+        bracketCount--;
+        if (bracketCount == 0) {
+          end = i;
+          break;
+        }
+      }
+    }
+
+    if (text[end + 1] != '(') {
       return const TextSpan();
     }
 
-    final linkText = basicMatch.group(1) ?? '';
-    final urlStart = basicMatch.end;
+    // First try to find the basic pattern
+    // final basicMatch = RegExp(r'(?<!\!)\[(.*)\]\(').firstMatch(text.trim());
+    // if (basicMatch == null) {
+    //   return const TextSpan();
+    // }
+
+    final linkText = text.substring(start, end);
+    final urlStart = end + 2;
 
     // Now find the balanced closing parenthesis
     int parenCount = 0;
@@ -892,14 +912,32 @@ class ATagMd extends InlineMd {
 
     var builder = config.linkBuilder;
 
+    var ending = text.substring(urlEnd + 1);
+
+    var endingSpans = MarkdownComponent.generate(
+      context,
+      ending,
+      config,
+      false,
+    );
+    var theme = GptMarkdownTheme.of(context);
+    var linkTextSpan = TextSpan(
+      children: MarkdownComponent.generate(context, linkText, config, false),
+      style: config.style?.copyWith(
+        color: theme.linkColor,
+        decorationColor: theme.linkColor,
+      ),
+    );
+
     // Use custom builder if provided
+    WidgetSpan? child;
     if (builder != null) {
-      return WidgetSpan(
+      child = WidgetSpan(
         child: GestureDetector(
           onTap: () => config.onLinkTap?.call(url, linkText),
           child: builder(
             context,
-            linkText,
+            linkTextSpan,
             url,
             config.style ?? const TextStyle(),
           ),
@@ -908,8 +946,9 @@ class ATagMd extends InlineMd {
     }
 
     // Default rendering
-    var theme = GptMarkdownTheme.of(context);
-    return WidgetSpan(
+    child ??= WidgetSpan(
+      alignment: PlaceholderAlignment.baseline,
+      baseline: TextBaseline.alphabetic,
       child: LinkButton(
         hoverColor: theme.linkHoverColor,
         color: theme.linkColor,
@@ -918,8 +957,11 @@ class ATagMd extends InlineMd {
         },
         text: linkText,
         config: config,
+        child: config.getRich(linkTextSpan),
       ),
     );
+    var textSpan = TextSpan(children: [child, ...endingSpans]);
+    return textSpan;
   }
 }
 
@@ -1038,19 +1080,80 @@ class TableMd extends BlockMd {
                       .asMap(),
             )
             .toList();
-    bool heading = RegExp(
-      r"^\|.*?\|\n\|-[-\\ |]*?-\|$",
-      multiLine: true,
-    ).hasMatch(text.trim());
+
+    // Check if table has a header and separator row
+    bool hasHeader = value.length >= 2;
+    List<TextAlign> columnAlignments = [];
+
+    if (hasHeader) {
+      // Parse alignment from the separator row (second row)
+      var separatorRow = value[1];
+      columnAlignments = List.generate(separatorRow.length, (index) {
+        String separator = separatorRow[index] ?? "";
+        separator = separator.trim();
+
+        // Check for alignment indicators
+        bool hasLeftColon = separator.startsWith(':');
+        bool hasRightColon = separator.endsWith(':');
+
+        if (hasLeftColon && hasRightColon) {
+          return TextAlign.center;
+        } else if (hasRightColon) {
+          return TextAlign.right;
+        } else if (hasLeftColon) {
+          return TextAlign.left;
+        } else {
+          return TextAlign.left; // Default alignment
+        }
+      });
+    }
+
     int maxCol = 0;
     for (final each in value) {
       if (maxCol < each.keys.length) {
         maxCol = each.keys.length;
       }
     }
+
     if (maxCol == 0) {
       return Text("", style: config.style);
     }
+
+    // Ensure we have alignment for all columns
+    while (columnAlignments.length < maxCol) {
+      columnAlignments.add(TextAlign.left);
+    }
+
+    var tableBuilder = config.tableBuilder;
+
+    if (tableBuilder != null) {
+      var customTable =
+          List<CustomTableRow?>.generate(value.length, (index) {
+            var isHeader = index == 0;
+            var row = value[index];
+            if (row.isEmpty) {
+              return null;
+            }
+            if (index == 1) {
+              return null;
+            }
+            var fields = List<CustomTableField>.generate(maxCol, (index) {
+              var field = row[index];
+              return CustomTableField(
+                data: field ?? "",
+                alignment: columnAlignments[index],
+              );
+            });
+            return CustomTableRow(isHeader: isHeader, fields: fields);
+          }).nonNulls.toList();
+      return tableBuilder(
+        context,
+        customTable,
+        config.style ?? const TextStyle(),
+        config,
+      );
+    }
+
     final controller = ScrollController();
     return Scrollbar(
       controller: controller,
@@ -1069,17 +1172,22 @@ class TableMd extends BlockMd {
               value
                   .asMap()
                   .entries
+                  .where((entry) {
+                    // Skip the separator row (second row) from rendering
+                    if (hasHeader && entry.key == 1) {
+                      return false;
+                    }
+                    return true;
+                  })
                   .map<TableRow>(
                     (entry) => TableRow(
                       decoration:
-                          (heading)
+                          (hasHeader && entry.key == 0)
                               ? BoxDecoration(
                                 color:
-                                    (entry.key == 0)
-                                        ? Theme.of(
-                                          context,
-                                        ).colorScheme.surfaceContainerHighest
-                                        : null,
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.surfaceContainerHighest,
                               )
                               : null,
                       children: List.generate(maxCol, (index) {
@@ -1090,20 +1198,41 @@ class TableMd extends BlockMd {
                           return const SizedBox();
                         }
 
-                        return Center(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            child: MdWidget(
-                              context,
-                              (e[index] ?? "").trim(),
-                              false,
-                              config: config,
-                            ),
+                        // Apply alignment based on column alignment
+                        Widget content = Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          child: MdWidget(
+                            context,
+                            (e[index] ?? "").trim(),
+                            false,
+                            config: config,
                           ),
                         );
+
+                        // Wrap with alignment widget
+                        switch (columnAlignments[index]) {
+                          case TextAlign.center:
+                            content = Center(child: content);
+                            break;
+                          case TextAlign.right:
+                            content = Align(
+                              alignment: Alignment.centerRight,
+                              child: content,
+                            );
+                            break;
+                          case TextAlign.left:
+                          default:
+                            content = Align(
+                              alignment: Alignment.centerLeft,
+                              child: content,
+                            );
+                            break;
+                        }
+
+                        return content;
                       }),
                     ),
                   )
@@ -1131,4 +1260,48 @@ class CodeBlockMd extends BlockMd {
     return config.codeBuilder?.call(context, name, codes, closed) ??
         CodeField(name: name, codes: codes);
   }
+}
+
+class UnderLineMd extends InlineMd {
+  @override
+  RegExp get exp =>
+      RegExp(r"<u>(.*?)(?:</u>|$)", multiLine: true, dotAll: true);
+
+  @override
+  InlineSpan span(
+    BuildContext context,
+    String text,
+    final GptMarkdownConfig config,
+  ) {
+    var match = exp.firstMatch(text.trim());
+    var conf = config.copyWith(
+      style: (config.style ?? const TextStyle()).copyWith(
+        decoration: TextDecoration.underline,
+        decorationColor: config.style?.color,
+      ),
+    );
+    return TextSpan(
+      children: MarkdownComponent.generate(
+        context,
+        "${match?[1]}",
+        conf,
+        false,
+      ),
+      style: conf.style,
+    );
+  }
+}
+
+class CustomTableField {
+  final String data;
+  final TextAlign alignment;
+
+  CustomTableField({required this.data, this.alignment = TextAlign.left});
+}
+
+class CustomTableRow {
+  final bool isHeader;
+  final List<CustomTableField> fields;
+
+  CustomTableRow({this.isHeader = false, required this.fields});
 }

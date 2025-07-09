@@ -1,3 +1,14 @@
+## 1.1.2
+
+* 📊 Fixed table column alignment support ([#65](https://github.com/Infinitix-LLC/gpt_markdown/issues/65))
+* 🎨 Added `tableBuilder` parameter to customize table rendering
+* 🔗 Fixed text decoration color of link markdown component
+
+## 1.1.1
+
+* 🖼️ Fixed issue where images wrapped in links (e.g. `[![](img)](url)`) were not rendering properly (#72)
+* 🔗 Resolved parsing errors for consecutive inline links without spacing (e.g. `[a](url)[b](url)`) (#34)
+
 ## 1.1.0
 
 * Changed `onLinkTab` to `onLinkTap` fixed issues of newLine issues.
