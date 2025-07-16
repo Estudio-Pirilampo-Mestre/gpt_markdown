@@ -43,7 +43,7 @@ class UnorderedListView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.baseline,
         children: [
           if (bulletSize == 0)
-            SizedBox(width: spacing + padding)
+            SizedBox(width: padding)
           else
             Text.rich(
               WidgetSpan(

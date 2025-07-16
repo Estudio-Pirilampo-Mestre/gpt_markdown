@@ -186,10 +186,11 @@ abstract class BlockMd extends MarkdownComponent {
     var spaces = matches?.namedGroup('spaces');
     var length = spaces?.length ?? 0;
     var child = build(context, text, config);
-    length = min(length, 4);
+    length = length ~/ 4;
     if (length > 0) {
       child = UnorderedListView(
-        spacing: length * 1.0,
+        bulletSize: 0,
+        padding: 32.0 * length,
         textDirection: config.textDirection,
         child: child,
       );
@@ -469,7 +470,7 @@ class UnOrderedList extends BlockMd {
         UnorderedListView(
           bulletColor:
               (config.style?.color ?? DefaultTextStyle.of(context).style.color),
-          padding: 7,
+          padding: 16,
           spacing: 10,
           bulletSize:
               0.3 *
