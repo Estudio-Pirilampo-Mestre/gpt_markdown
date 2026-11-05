@@ -142,6 +142,7 @@ class GptMarkdown extends StatelessWidget {
     this.linkBuilder,
     this.maxLines,
     this.overflow,
+    this.clipView = true,
     this.orderedListBuilder,
     this.unOrderedListBuilder,
     this.tableBuilder,
@@ -208,6 +209,9 @@ class GptMarkdown extends StatelessWidget {
 
   /// The overflow.
   final TextOverflow? overflow;
+
+  /// Whether to clip the rendered Markdown to its bounds.
+  final bool clipView;
 
   /// Builds the span for an inline formula — `\(…\)`, or `$…$` with
   /// [useDollarSignsForLatex] — replacing the default one.
@@ -800,14 +804,16 @@ class GptMarkdown extends StatelessWidget {
       );
     }
 
+    Widget clip(Widget child) => clipView ? ClipRRect(child: child) : child;
+
     // The reveal forces the incremental path even when the caller did not ask
     // for it: it is the only pipeline that keeps spans around to restyle.
     if ((incremental || _usesSpanReveal) &&
         components == null &&
         inlineComponents == null) {
       return wrap(
-        ClipRRect(
-          child: _IncrementalMdView(
+        clip(
+          _IncrementalMdView(
             text: tex,
             config: config,
             effect: animation,
@@ -824,9 +830,7 @@ class GptMarkdown extends StatelessWidget {
       );
     }
     return wrap(
-      ClipRRect(
-        child: MdWidget(context, tex, true, isRoot: true, config: config),
-      ),
+      clip(MdWidget(context, tex, true, isRoot: true, config: config)),
     );
   }
 }
