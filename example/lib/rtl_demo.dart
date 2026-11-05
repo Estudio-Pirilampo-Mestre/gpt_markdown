@@ -6,10 +6,12 @@ import 'html_tags_demo.dart';
 import 'rtl_sample.dart';
 
 /// Run directly: flutter run -d macos -t lib/rtl_demo.dart
-void main() => runApp(DemoApp(
-      title: 'RTL block alignment',
-      pageBuilder: (toggleTheme) => RtlPage(onToggleTheme: toggleTheme),
-    ));
+void main() => runApp(
+  DemoApp(
+    title: 'RTL block alignment',
+    pageBuilder: (toggleTheme) => RtlPage(onToggleTheme: toggleTheme),
+  ),
+);
 
 class RtlPage extends StatefulWidget {
   const RtlPage({super.key, this.onToggleTheme});
@@ -43,100 +45,129 @@ class _RtlPageState extends State<RtlPage> {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Scaffold(
-        appBar: AppBar(title: const Text('RTL block alignment'), actions: [
-          if (widget.onToggleTheme != null)
-            IconButton(
+        appBar: AppBar(
+          title: const Text('RTL block alignment'),
+          actions: [
+            if (widget.onToggleTheme != null)
+              IconButton(
                 onPressed: widget.onToggleTheme,
                 tooltip: 'Toggle theme',
-                icon: const Icon(Icons.brightness_6)),
-        ]),
-        body: Column(children: [
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Wrap(
-              spacing: 16,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                DropdownButton<String>(
-                  key: const ValueKey('rtl-renderer'),
-                  value: _renderer,
-                  items: ['Plusparse', 'Legacy regex', 'Lazy sliver']
-                      .map((value) =>
-                          DropdownMenuItem(value: value, child: Text(value)))
-                      .toList(),
-                  onChanged: (value) => setState(() => _renderer = value!),
-                ),
-                TextButton.icon(
-                  key: const ValueKey('rtl-direction'),
-                  icon: Icon(_direction == TextDirection.rtl
-                      ? Icons.format_textdirection_r_to_l
-                      : Icons.format_textdirection_l_to_r),
-                  label: Text(_direction == TextDirection.rtl ? 'RTL' : 'LTR'),
-                  onPressed: () => setState(() => _direction =
+                icon: const Icon(Icons.brightness_6),
+              ),
+          ],
+        ),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Wrap(
+                spacing: 16,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  DropdownButton<String>(
+                    key: const ValueKey('rtl-renderer'),
+                    value: _renderer,
+                    items: ['Plusparse', 'Legacy regex', 'Lazy sliver']
+                        .map(
+                          (value) => DropdownMenuItem(
+                            value: value,
+                            child: Text(value),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) => setState(() => _renderer = value!),
+                  ),
+                  TextButton.icon(
+                    key: const ValueKey('rtl-direction'),
+                    icon: Icon(
                       _direction == TextDirection.rtl
+                          ? Icons.format_textdirection_r_to_l
+                          : Icons.format_textdirection_l_to_r,
+                    ),
+                    label: Text(
+                      _direction == TextDirection.rtl ? 'RTL' : 'LTR',
+                    ),
+                    onPressed: () => setState(
+                      () => _direction = _direction == TextDirection.rtl
                           ? TextDirection.ltr
-                          : TextDirection.rtl),
-                ),
-                DropdownButton<double>(
-                  value: _scale,
-                  items: [0.85, 1.0, 1.3, 1.5, 2.0, 3.0]
-                      .map((value) => DropdownMenuItem(
-                          value: value, child: Text('Text ${value}x')))
-                      .toList(),
-                  onChanged: (value) => setState(() => _scale = value!),
-                ),
-              ],
-            ),
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12),
-            child: Text(
-                'One sample: blocks, nested lists and quotes, inline elements and custom badges. '
-                'Code keeps its left-to-right reading order.'),
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-              child: Center(
-                  child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 760),
-            child: Container(
-              key: const ValueKey('rtl-preview'),
-              decoration: BoxDecoration(
-                  border:
-                      Border.all(color: Theme.of(context).colorScheme.outline)),
-              child: SelectionArea(
-                child: _renderer == 'Lazy sliver'
-                    ? CustomScrollView(
-                        key: const ValueKey('rtl-sliver'),
-                        slivers: [
-                          SliverPadding(
-                              padding: const EdgeInsets.all(16),
-                              sliver: SliverGptMarkdown(source, config: config))
-                        ],
-                      )
-                    : SingleChildScrollView(
-                        key: ValueKey(_renderer),
-                        padding: const EdgeInsets.all(16),
-                        child: SizedBox(
-                            width: double.infinity,
-                            child: GptMarkdown(
-                              source,
-                              textDirection: _direction,
-                              // ignore: deprecated_member_use
-                              incremental: _renderer == 'Plusparse',
-                              style: style,
-                              textScaler: scaler,
-                              inlinePatterns: rtlInlinePatterns,
-                              inlineDirectives: rtlInlineDirectives,
-                              imageBuilder: rtlImageBuilder,
-                              htmlTags: demoHtmlTags,
-                            )),
-                      ),
+                          : TextDirection.rtl,
+                    ),
+                  ),
+                  DropdownButton<double>(
+                    value: _scale,
+                    items: [0.85, 1.0, 1.3, 1.5, 2.0, 3.0]
+                        .map(
+                          (value) => DropdownMenuItem(
+                            value: value,
+                            child: Text('Text ${value}x'),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) => setState(() => _scale = value!),
+                  ),
+                ],
               ),
             ),
-          ))),
-        ]),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: Text(
+                'One sample: blocks, nested lists and quotes, inline elements and custom badges. '
+                'Code keeps its left-to-right reading order.',
+              ),
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 760),
+                  child: Container(
+                    key: const ValueKey('rtl-preview'),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                    ),
+                    child: SelectionArea(
+                      child: _renderer == 'Lazy sliver'
+                          ? CustomScrollView(
+                              key: const ValueKey('rtl-sliver'),
+                              slivers: [
+                                SliverPadding(
+                                  padding: const EdgeInsets.all(16),
+                                  sliver: SliverGptMarkdown(
+                                    source,
+                                    config: config,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : SingleChildScrollView(
+                              key: ValueKey(_renderer),
+                              padding: const EdgeInsets.all(16),
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: GptMarkdown(
+                                  source,
+                                  textDirection: _direction,
+                                  // ignore: deprecated_member_use
+                                  incremental: _renderer == 'Plusparse',
+                                  style: style,
+                                  textScaler: scaler,
+                                  inlinePatterns: rtlInlinePatterns,
+                                  inlineDirectives: rtlInlineDirectives,
+                                  imageBuilder: rtlImageBuilder,
+                                  htmlTags: demoHtmlTags,
+                                ),
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -182,20 +213,26 @@ final rtlInlineDirectives = <InlineDirective>[
 
 // A local illustration keeps image placement testable offline on every device.
 Widget rtlImageBuilder(
-        BuildContext context, String url, double? width, double? height) =>
-    Semantics(
-      label: 'رسم مكتبة',
-      image: true,
-      child: Container(
-        width: width ?? 160,
-        height: height ?? 90,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.tertiaryContainer,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: const FittedBox(
-          child: Padding(
-              padding: EdgeInsets.all(8), child: Icon(Icons.local_library)),
-        ),
+  BuildContext context,
+  String url,
+  String altText,
+  double? width,
+  double? height,
+) => Semantics(
+  label: 'رسم مكتبة',
+  image: true,
+  child: Container(
+    width: width ?? 160,
+    height: height ?? 90,
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.tertiaryContainer,
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: const FittedBox(
+      child: Padding(
+        padding: EdgeInsets.all(8),
+        child: Icon(Icons.local_library),
       ),
-    );
+    ),
+  ),
+);

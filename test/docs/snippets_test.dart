@@ -10,9 +10,9 @@
 library;
 
 import 'package:flutter/gestures.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:val_latex_flutter/val_latex_flutter.dart' show Math, MathSpan;
 
 const documentedCharacterAnimations = <GptMarkdownAnimation>[
@@ -124,7 +124,7 @@ Widget docsCompile(BuildContext context) {
     radioOptionBuilder: (context, selected, content, style) => content,
     hrBuilder: (context, style) => const SizedBox(),
     codeBuilder: (context, name, code, closed) => Text(code),
-    imageBuilder: (context, url, width, height) => const SizedBox(),
+    imageBuilder: (context, url, altText, width, height) => const SizedBox(),
     latexBuilder: (context, tex, style, inline) => Text(tex),
     inlineLatexBuilder: (latex) => latex.defaultSpan(),
     blockLatexBuilder: (latex) =>
@@ -496,7 +496,8 @@ Widget alertSnippets() {
 Widget dataUrlImageBuilder() {
   return GptMarkdown(
     'text',
-    imageBuilder: (context, url, width, height) => url.startsWith('data:')
+    imageBuilder: (context, url, altText, width, height) =>
+        url.startsWith('data:')
         ? Image.memory(
             UriData.parse(url).contentAsBytes(),
             width: width,

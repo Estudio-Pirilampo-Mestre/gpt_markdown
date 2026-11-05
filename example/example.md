@@ -52,7 +52,7 @@ GptMarkdown(
   onLatexTap: (tap) => explain(tap.source),
 
   // Cached images with a placeholder.
-  imageBuilder: (context, url, width, height) => CachedNetworkImage(
+  imageBuilder: (context, url, altText, width, height) => CachedNetworkImage(
     imageUrl: url,
     width: width,
     height: height,

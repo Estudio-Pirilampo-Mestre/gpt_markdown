@@ -250,15 +250,10 @@ typedef ImageBuilder =
     Widget Function(
       BuildContext context,
       String imageUrl,
+      String altText,
       double? width,
       double? height,
     );
-
-/// Builds an image with its original alt text.
-///
-/// Use this when the alt text is needed to choose or label a custom image.
-typedef ImageAltTextBuilder =
-    Widget Function(BuildContext context, String imageUrl, String altText);
 
 /// What an inline builder is told about the construct it is rendering.
 ///
@@ -752,7 +747,6 @@ class GptMarkdownConfig {
     @Deprecated('Use inlineLinkBuilder. Will be removed in 2.0.0.')
     this.linkBuilder,
     this.imageBuilder,
-    this.imageAltTextBuilder,
     this.maxLines,
     this.overflow,
     this.components,
@@ -936,9 +930,6 @@ class GptMarkdownConfig {
   /// The image builder.
   final ImageBuilder? imageBuilder;
 
-  /// Builds an image with its original alt text, before [imageBuilder].
-  final ImageAltTextBuilder? imageAltTextBuilder;
-
   /// The list of components.
   final List<MarkdownComponent>? components;
 
@@ -1048,7 +1039,6 @@ class GptMarkdownConfig {
     @Deprecated('Use inlineLinkBuilder. Will be removed in 2.0.0.')
     final LinkBuilder? linkBuilder,
     final ImageBuilder? imageBuilder,
-    final ImageAltTextBuilder? imageAltTextBuilder,
     final OrderedListBuilder? orderedListBuilder,
     final UnOrderedListBuilder? unOrderedListBuilder,
     final List<MarkdownComponent>? components,
@@ -1103,7 +1093,6 @@ class GptMarkdownConfig {
       // ignore: deprecated_member_use_from_same_package
       linkBuilder: linkBuilder ?? this.linkBuilder,
       imageBuilder: imageBuilder ?? this.imageBuilder,
-      imageAltTextBuilder: imageAltTextBuilder ?? this.imageAltTextBuilder,
       orderedListBuilder: orderedListBuilder ?? this.orderedListBuilder,
       unOrderedListBuilder: unOrderedListBuilder ?? this.unOrderedListBuilder,
       components: components ?? this.components,

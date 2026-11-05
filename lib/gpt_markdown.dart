@@ -120,7 +120,6 @@ class GptMarkdown extends StatelessWidget {
     this.latexWorkaround,
     this.textAlign,
     this.imageBuilder,
-    this.imageAltTextBuilder,
     this.textScaler,
     this.onLinkTap,
     this.inlineLatexBuilder,
@@ -314,9 +313,6 @@ class GptMarkdown extends StatelessWidget {
 
   /// The image builder.
   final ImageBuilder? imageBuilder;
-
-  /// Builds an image with its original alt text, before [imageBuilder].
-  final ImageAltTextBuilder? imageAltTextBuilder;
 
   /// The ordered list builder.
   final OrderedListBuilder? orderedListBuilder;
@@ -747,7 +743,6 @@ class GptMarkdown extends StatelessWidget {
       // ignore: deprecated_member_use_from_same_package
       linkBuilder: linkBuilder,
       imageBuilder: imageBuilder,
-      imageAltTextBuilder: imageAltTextBuilder,
       orderedListBuilder: orderedListBuilder,
       unOrderedListBuilder: unOrderedListBuilder,
       components: components,

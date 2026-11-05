@@ -579,7 +579,7 @@ styleSheet: const GptMarkdownStyleSheet(
 ```dart
 GptMarkdown(
   text,
-  imageBuilder: (context, url, width, height) => CachedNetworkImage(
+  imageBuilder: (context, url, altText, width, height) => CachedNetworkImage(
     imageUrl: url,
     width: width,
     height: height,
@@ -594,6 +594,7 @@ GptMarkdown(
 ```
 
 `width` and `height` come from the alt text when written as `WxH`.
+The original `altText` is also passed to the builder.
 
 **Inline images.** A `data:` URL works wherever a network URL does:
 
@@ -729,7 +730,7 @@ resolved code style reaches it only where the surrounding style is null.
 | `hrBuilder` | `(context, HrStyle style)` |
 | `codeBuilder` | `(context, String name, String code, bool closed)` |
 | `tableBuilder` | `(context, rows, TextStyle style, GptMarkdownConfig config)` |
-| `imageBuilder` | `(context, String url, double? width, double? height)` |
+| `imageBuilder` | `(context, String url, String altText, double? width, double? height)` |
 | `inlineLatexBuilder` | `(InlineLatexBuildDetails details)` → `InlineSpan` |
 | `blockLatexBuilder` | `(BlockLatexBuildDetails details)` → `Widget` |
 | `latexBuilder` | *Deprecated.* `(context, String tex, TextStyle style, bool inline)` |

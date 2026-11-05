@@ -9,9 +9,9 @@
 /// and it keeps the fallback.
 library;
 
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../utils/test_helpers.dart';
 
@@ -35,14 +35,19 @@ String _text(WidgetTester tester) =>
 /// A sized, solid stand-in for the image, so a tap has somewhere to land: a
 /// 1×1 test image lays out at zero size before it decodes.
 const _badgeKey = Key('badge');
-Widget _badge(BuildContext context, String url, double? w, double? h) =>
-    const SizedBox(
-      key: _badgeKey,
-      width: 40,
-      height: 20,
-      // Solid, so it takes the tap itself, the way a decoded image does.
-      child: ColoredBox(color: Color(0xFF00AA00)),
-    );
+Widget _badge(
+  BuildContext context,
+  String url,
+  String altText,
+  double? w,
+  double? h,
+) => const SizedBox(
+  key: _badgeKey,
+  width: 40,
+  height: 20,
+  // Solid, so it takes the tap itself, the way a decoded image does.
+  child: ColoredBox(color: Color(0xFF00AA00)),
+);
 
 void main() {
   testWidgets('a badge link renders its image, not its source', (tester) async {

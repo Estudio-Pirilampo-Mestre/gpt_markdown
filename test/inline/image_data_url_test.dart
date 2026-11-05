@@ -20,7 +20,6 @@ Future<void> _pump(
   String markdown, {
   bool legacy = false,
   ImageBuilder? imageBuilder,
-  ImageAltTextBuilder? imageAltTextBuilder,
   void Function(String url)? onImageTap,
 }) async {
   await tester.pumpWidget(
@@ -33,7 +32,6 @@ Future<void> _pump(
                 ? MarkdownComponent.inlineComponents
                 : null,
             imageBuilder: imageBuilder,
-            imageAltTextBuilder: imageAltTextBuilder,
             onImageTap: onImageTap,
           ),
         ),
@@ -99,20 +97,23 @@ void main() {
         }
       });
 
-      testWidgets('imageBuilder and onImageTap get the URL as written', (
+      testWidgets('imageBuilder receives image metadata and URL as written', (
         tester,
       ) async {
-        String? built;
+        final builtUrls = <String>[];
+        final receivedMetadata = <(String, double?, double?)>[];
         await _pump(
           tester,
-          '![]($_dataUrl)',
+          '![32x20]($_dataUrl) ![A badge]($_dataUrl)',
           legacy: legacy,
-          imageBuilder: (context, url, width, height) {
-            built = url;
+          imageBuilder: (context, url, altText, width, height) {
+            builtUrls.add(url);
+            receivedMetadata.add((altText, width, height));
             return const SizedBox(width: 10, height: 10);
           },
         );
-        expect(built, _dataUrl);
+        expect(builtUrls, [_dataUrl, _dataUrl]);
+        expect(receivedMetadata, [('32x20', 32, 20), ('A badge', null, null)]);
 
         String? tapped;
         await _pump(
@@ -123,22 +124,6 @@ void main() {
         );
         await tester.tap(find.byType(Image));
         expect(tapped, _dataUrl);
-      });
-
-      testWidgets('imageAltTextBuilder receives the original alt text', (
-        tester,
-      ) async {
-        String? receivedAltText;
-        await _pump(
-          tester,
-          '![A badge]($_dataUrl)',
-          legacy: legacy,
-          imageAltTextBuilder: (context, url, altText) {
-            receivedAltText = altText;
-            return const SizedBox(width: 10, height: 10);
-          },
-        );
-        expect(receivedAltText, 'A badge');
       });
     });
   }

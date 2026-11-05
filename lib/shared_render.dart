@@ -731,7 +731,6 @@ InlineSpan imageSpan(
       );
 
   final builder = config.imageBuilder;
-  final altTextBuilder = config.imageAltTextBuilder;
   final Widget image;
   // An SVG keeps its proportions unless a style says otherwise: stretched to
   // a box like a bitmap, a badge given only a width would distort.
@@ -739,10 +738,8 @@ InlineSpan imageSpan(
   Widget svgError(BuildContext context) => const CustomImageError();
   Widget svgLoading(BuildContext context) =>
       const CustomImageLoading(progress: 1);
-  if (altTextBuilder != null) {
-    image = altTextBuilder(context, url, altText);
-  } else if (builder != null) {
-    image = builder(context, url, width, height);
+  if (builder != null) {
+    image = builder(context, url, altText, width, height);
   } else if (isSvgUrl(url)) {
     image = SizedBox(
       width: width,
