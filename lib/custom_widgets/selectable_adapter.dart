@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 
 /// A custom widget that allows text selection in a widget.
@@ -153,10 +153,12 @@ class _RenderSelectableAdapter extends RenderProxyBox
       _geometry.value = SelectionGeometry(
         status: SelectionStatus.uncollapsed,
         hasContent: true,
-        startSelectionPoint:
-            isReversed ? secondSelectionPoint : firstSelectionPoint,
-        endSelectionPoint:
-            isReversed ? firstSelectionPoint : secondSelectionPoint,
+        startSelectionPoint: isReversed
+            ? secondSelectionPoint
+            : firstSelectionPoint,
+        endSelectionPoint: isReversed
+            ? firstSelectionPoint
+            : secondSelectionPoint,
         selectionRects: <Rect>[selectionRect],
       );
     }
@@ -208,22 +210,21 @@ class _RenderSelectableAdapter extends RenderProxyBox
           }
         }
         // Move the corresponding selection edge.
-        final Offset newOffset =
-            extendSelectionEvent.forward ? Offset.infinite : Offset.zero;
+        final Offset newOffset = extendSelectionEvent.forward
+            ? Offset.infinite
+            : Offset.zero;
         if (extendSelectionEvent.isEnd) {
           if (newOffset == _end) {
-            result =
-                extendSelectionEvent.forward
-                    ? SelectionResult.next
-                    : SelectionResult.previous;
+            result = extendSelectionEvent.forward
+                ? SelectionResult.next
+                : SelectionResult.previous;
           }
           _end = newOffset;
         } else {
           if (newOffset == _start) {
-            result =
-                extendSelectionEvent.forward
-                    ? SelectionResult.next
-                    : SelectionResult.previous;
+            result = extendSelectionEvent.forward
+                ? SelectionResult.next
+                : SelectionResult.previous;
           }
           _start = newOffset;
         }
@@ -321,10 +322,9 @@ class _RenderSelectableAdapter extends RenderProxyBox
       return;
     }
     // Draw the selection highlight.
-    final Paint selectionPaint =
-        Paint()
-          ..style = PaintingStyle.fill
-          ..color = _selectionColor;
+    final Paint selectionPaint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = _selectionColor;
     context.canvas.drawRect(
       _getSelectionHighlightRect().shift(offset),
       selectionPaint,

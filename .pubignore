@@ -1,0 +1,92 @@
+# A `.pubignore` REPLACES `.gitignore` for publishing — pub does not read
+# `.gitignore` when this file exists. Everything that must stay out of the
+# published archive has to be listed here, including build output.
+
+# Build output and tool caches.
+build/
+.dart_tool/
+.idea/
+.vscode/
+*.iml
+
+# Development surfaces. Useful in the repository, not to consumers.
+widgetbook/
+scripts/
+tool/
+.github/
+
+# Website and local workspace surfaces are published independently.
+# The package README links to the source documentation on GitHub.
+website/
+docs/
+
+# The built Flutter playground and local Replit metadata do not belong in the
+# package archive.
+doc/
+.agents/
+.cache/
+.config/
+.local/
+artifacts/
+attached_assets/
+.replit
+replit.nix
+replit.md
+screenshots/
+seo_strategy.md
+push.sh
+start.sh
+
+# The example's own build output and lockfile.
+example/build/
+example/.dart_tool/
+example/pubspec.lock
+
+# `example/` is the example pub.dev shows. `example_ai_chat/` is a second,
+# heavier harness (a live OpenAI-protocol connector plus four platform
+# folders) that belongs in the repository, not in the published archive.
+example_ai_chat/
+
+# Libraries should not publish a lockfile.
+pubspec.lock
+
+# Local performance harnesses. They assert nothing, take minutes, and exist to
+# compare revisions of this package against each other. `.gitignore` keeps them
+# untracked, but this file replaces `.gitignore` at publish time, so they have
+# to be named again here or they ship.
+benchmark/
+
+# The package's own tests. They are the repository's guarantee, not something a
+# consumer compiles against, and they carry fixtures and golden images.
+test/
+test/**/failures/
+
+# Repository task running and editor tooling.
+justfile
+devtools_options.yaml
+example/analysis_options.yaml
+example/devtools_options.yaml
+
+# The example ships for its source: `example/lib`, its pubspec and `example.md`
+# are what pub.dev renders and what pana checks for. The platform scaffolding is
+# generated boilerplate — six folders of manifests, icons and Gradle files that
+# no reader of the package needs.
+example/android/
+example/ios/
+example/linux/
+example/macos/
+example/web/
+example/windows/
+example/test/
+
+# Editor and OS debris that `.gitignore` would have caught.
+.DS_Store
+*.log
+*.swp
+migrate_working_dir/
+**/doc/api/
+
+# FVM local Flutter SDK pin. `.gitignore` covers it, but this file replaces
+# `.gitignore` at publish time.
+.fvm/
+.fvmrc

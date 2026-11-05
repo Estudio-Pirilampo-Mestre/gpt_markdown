@@ -23,7 +23,40 @@ migrate_working_dir/
 
 # Flutter/Dart/Pub related
 # Libraries should not include pubspec.lock, per https://dart.dev/guides/libraries/private-files#pubspeclock.
-/pubspec.lock
+**/pubspec.lock
 **/doc/api/
 .dart_tool/
 build/
+
+# Replit
+.replit
+replit.nix
+replit.md
+attached_assets/
+
+# Local performance benchmarks.
+#
+# They assert nothing, take minutes to run, and exist to compare revisions of
+# this package against each other — not to guard behaviour. Keeping them out of
+# `test/` keeps them out of `flutter test` and CI; keeping them untracked keeps
+# them out of the published archive. `docs/performance-baseline.md` records the
+# numbers they produce, and carries the harness inline so it can be recreated.
+/benchmark/
+
+# Golden comparison artefacts. Written on a failing run, never input.
+test/**/failures/
+
+# Internal competitor comparison. Kept locally; `docs/benchmark.md` is the
+# published version, without the third-party chat kit.
+docs/comparison.md
+
+# Blog drafts. Written here, published elsewhere — not part of the package.
+/block/
+
+# FVM — local Flutter SDK pin. Kept entirely untracked, version included.
+# No leading slash, so these match in nested apps (example/, widgetbook/) too.
+.fvm/
+.fvmrc
+
+# Local scratch space for demos and recordings. Never committed.
+/demo/

@@ -1,30 +1,71 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-
 import 'package:example/main.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:gpt_markdown/gpt_markdown.dart';
+
+/// Counts rendered links.
+///
+/// A link is a `LinkTextSpan` now, not a `LinkButton` widget — that is what
+/// lets its label wrap across lines and be selected with the text around it.
+int countLinks(WidgetTester tester) {
+  var count = 0;
+  for (final rich in tester.widgetList<RichText>(
+    find.byWidgetPredicate((w) => w is RichText),
+  )) {
+    void walk(InlineSpan span) {
+      if (span is LinkTextSpan) {
+        count += 1;
+      }
+      span.visitDirectChildren((child) {
+        walk(child);
+        return true;
+      });
+    }
+
+    walk(rich.text);
+  }
+  return count;
+}
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('the example page renders its sample markdown', (tester) async {
+    tester.view.physicalSize = const Size(1200, 3000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    await tester.pumpWidget(const App());
+    await tester.pumpAndSettle();
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    expect(find.byType(GptMarkdown), findsOneWidget);
+    // The sample ends with a link, so rendering got all the way through.
+    expect(countLinks(tester), greaterThan(0));
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('each demo is reachable from the app bar', (tester) async {
+    tester.view.physicalSize = const Size(1200, 3000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(const App());
+    await tester.pumpAndSettle();
+
+    for (final demo in <(IconData, String)>[
+      (Icons.text_fields_rounded, 'Selection'),
+      (Icons.link_rounded, 'Autolinks'),
+      (Icons.code_rounded, 'Inline code'),
+      (Icons.alternate_email_rounded, 'Inline patterns'),
+    ]) {
+      await tester.tap(find.byIcon(demo.$1));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(demo.$2),
+        findsOneWidget,
+        reason: 'tapping the app bar icon should open "${demo.$2}"',
+      );
+
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+    }
   });
 }

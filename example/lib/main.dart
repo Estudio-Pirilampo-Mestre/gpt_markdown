@@ -1,731 +1,645 @@
-import 'dart:io';
-
-import 'package:desktop_drop/desktop_drop.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_math_fork/flutter_math.dart';
-import 'package:gpt_markdown/custom_widgets/selectable_adapter.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
-import 'package:watcher/watcher.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+import 'alerts_demo.dart';
+import 'autolink_demo.dart';
+import 'demo_theme.dart';
+import 'html_gallery_demo.dart';
+import 'html_tags_demo.dart';
+import 'inline_code_demo.dart';
+import 'inline_patterns_demo.dart';
+import 'math_demo.dart';
+import 'max_lines_demo.dart';
+import 'selection_demo.dart';
+import 'rtl_demo.dart';
+import 'rtl_sample.dart';
+import 'streaming_demo.dart';
+import 'text_scale_demo.dart';
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+/// Minimal example for gpt_markdown — Markdown & LaTeX renderer for Flutter.
+///
+/// For the full interactive playground visit https://gptmarkdown.com/playground
+void main() => runApp(const App());
 
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
+class App extends StatelessWidget {
+  const App({super.key});
 
-class _MyAppState extends State<MyApp> {
-  ThemeMode _themeMode = ThemeMode.dark;
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      themeMode: _themeMode,
-      theme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.light,
-        colorSchemeSeed: Colors.blue,
-        extensions: [
-          GptMarkdownThemeData(
-            brightness: Brightness.light,
-            highlightColor: Colors.red,
-          ),
-        ],
-      ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.dark,
-        colorSchemeSeed: Colors.blue,
-        extensions: [
-          GptMarkdownThemeData(
-            brightness: Brightness.dark,
-            highlightColor: Colors.red,
-          ),
-        ],
-      ),
-      home: MyHomePage(
-        title: 'GptMarkdown',
-        onPressed: () {
-          setState(() {
-            _themeMode = (_themeMode == ThemeMode.dark)
-                ? ThemeMode.light
-                : ThemeMode.dark;
-          });
-        },
-      ),
+    return DemoApp(
+      title: 'gpt_markdown example',
+      pageBuilder: (toggleTheme) => ExamplePage(onToggleTheme: toggleTheme),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title, required this.onPressed});
-  final VoidCallback? onPressed;
+/// Sample content showing every syntax gpt_markdown renders.
+///
+/// Rendered with the `$…$ math` switch on, which is the default here so the
+/// dollar examples work.
+const _markdown = r'''
+# GPT Markdown
 
-  final String title;
+Every syntax the renderer understands, one section each. Edit anything on
+the left and watch it render.
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
+## Headings
 
-class _MyHomePageState extends State<MyHomePage> {
-  TextDirection _direction = TextDirection.ltr;
-  final TextEditingController _controller = TextEditingController(
-    text: r'''This is a sample markdown document.
-* **bold**
-* *italic*
-* **_bold and italic_**
-* ~~strikethrough~~
-* `code`
-* [link](https://www.google.com)
+# Heading 1
+## Heading 2
+### Heading 3
+#### Heading 4
+##### Heading 5
+###### Heading 6
 
-[![alt text](https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png)](link_url)
-```markdown
-# Complex Markdown Document for Testing
+### Closing hashes are optional ###
 
-This document is designed to **challenge** your `gpt_markdown` package by incorporating a wide variety of Markdown components including headers, lists, tables, code blocks, blockquotes, footnotes, and LaTeX math expressions.
+Setext heading 1
+================
 
----
+Setext heading 2
+----------------
 
-## Table of Contents
-1. [Headers and Emphasis](#headers-and-emphasis)
-2. [Lists](#lists)
-3. [Code Blocks and Inline Code](#code-blocks-and-inline-code)
-4. [Tables](#tables)
-5. [Blockquotes and Nested Elements](#blockquotes-and-nested-elements)
-6. [Mathematical Expressions](#mathematical-expressions)
-7. [Links and Images](#links-and-images)
-8. [Footnotes](#footnotes)
-9. [Horizontal Rules and Miscellaneous](#horizontal-rules-and-miscellaneous)
+## Emphasis
 
----
+**Bold**, *italic*, ***bold italic***, ~~strikethrough~~ and <u>underline</u>.
 
-## Headers and Emphasis
+__Bold__, _italic_ and ___bold italic___ with underscores.
 
-### Header Levels
-Markdown supports multiple header levels:
-- `# Header 1`
-- `## Header 2`
-- `### Header 3`
-- `#### Header 4`
-- `##### Header 5`
-- `###### Header 6`
+Mixed: **bold with _italic_ inside** and *italic with **bold** inside*.
 
-### Emphasis Examples
-- *Italicized text* using single asterisks or underscores.
-- **Bold text** using double asterisks or underscores.
-- ***Bold and italic*** by combining them.
-- ~~Strikethrough~~ text using two tildes.
+An underscore inside a word is never emphasis: snake_case_name, MAX_VALUE.
 
----
+A star with a space after it is arithmetic: 2 * 3 * 4 = 24.
+
+## Inline code
+
+Single backticks: `flutter pub add gpt_markdown`.
+
+Double backticks hold a backtick: `` Use `code` here ``.
+
+Markup is not parsed in code: `**not bold** _not italic_ &amp;`.
+
+## Escapes and entities
+
+Backslash escapes show the character: \*not italic\*, \_not italic\_,
+\# not a heading, \`not code\`, price \$5.
+
+Entities decode: &amp; &lt;tag&gt; &copy; &reg; &trade; &mdash; &hellip;
+&rarr; &le; &ne; &infin; &alpha;&beta;&gamma; &#169; &#x1F680;
+
+Line one ends with a backslash\
+so this is a new line. Line three ends with two spaces  
+and so does this break.
+
+<!-- This comment is hidden. Open the editor to see it. -->
+
+## Links
+
+Inline [link](https://gptmarkdown.com), with a
+[title](https://gptmarkdown.com "gpt_markdown home"), and to a
+[path with spaces](<docs/getting started.md>).
+
+Reference links: [full form][home], [collapsed][], and [shortcut].
+
+Autolinks: https://pub.dev/packages/gpt_markdown, www.flutter.dev,
+<https://dart.dev>, and hello@example.com.
+
+[home]: https://gptmarkdown.com "gpt_markdown"
+[collapsed]: https://pub.dev
+[shortcut]: https://github.com/useval/gpt_markdown
+
+## Images
+
+![120x](https://raw.githubusercontent.com/useval/gpt_markdown/main/screenshots/math.png)
+
+SVG renders too — README badges from shields.io:
+
+<p align="center">
+<a href="https://pub.dev/packages/gpt_markdown"><img src="https://img.shields.io/pub/v/gpt_markdown?color=F47C3C" alt="Pub Version"></a>
+<a href="https://pub.dev/packages/gpt_markdown/score"><img src="https://img.shields.io/pub/points/gpt_markdown?color=44C11F" alt="Pub Points"></a>
+<img src="https://img.shields.io/badge/license-BSD--3--Clause-1687D2.svg" alt="BSD-3-Clause license">
+<img src="https://img.shields.io/badge/Follow%20Val%20on%20X-%40use__val-F47C3C?logo=x&logoColor=white&labelColor=000000" alt="Follow Val on X">
+</p>
+
+## Citations and footnotes
+
+Large language models cite sources [1] [2], and the chip opens the
+URL defined below it.
+
+Footnotes add notes at the end[^note], numbered in order[^2].
+
+[1]: https://en.wikipedia.org/wiki/Large_language_model
+[2]: https://en.wikipedia.org/wiki/Markdown
+
+[^note]: A footnote can hold **Markdown** and [links](https://commonmark.org).
+[^2]: The second footnote.
+
+## LaTeX math
+
+Inline with \( E = mc^2 \) and \( x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} \).
+
+Block with brackets:
+
+\[
+\int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}
+\]
+
+Block with dollars:
+
+$$
+\sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}
+$$
+
+Inline with dollars too: $a^2 + b^2 = c^2$, in the same reply as the
+`\( \)` formulas above. Prices stay prose: it costs $5 and $10.
+
+## Code blocks
+
+```dart
+GptMarkdown(
+  r'**Hello** from _gpt_markdown_! Inline LaTeX: \( E = mc^2 \)',
+)
+```
+
+~~~python
+for epoch in range(100):
+    theta -= alpha * compute_gradient(X, y, theta)
+~~~
+
+````markdown
+A longer fence can show a fence:
+```bash
+echo $HOME
+```
+````
 
 ## Lists
 
-### Unordered List
-- Item 1
-  - Nested Item 1.1
-  - Nested Item 1.2
-    - Deeply Nested Item 1.2.1
-- Item 2
-  - [ ] Task not completed
-  - [x] Task completed
+- Bullet with `-`
+* Bullet with `*`
++ Bullet with `+`
+  - Nested bullet
+    - Deeper bullet
 
-### Ordered List
-1. First item
-2. Second item with nested list:
-   1. Subitem 2.1
-   2. Subitem 2.2
-3. Third item
+1. First
+2. Second
+   1. Nested ordered
+   2. Items
 
-### Mixed List Example
-- **Fruits**
-  1. Apple
-  2. Banana
-  3. Cherry
-- **Vegetables**
-  - Carrot
-  - Lettuce
-  - Spinach
+A list can start at any number:
 
----
+5. Starts at five
+6. And keeps counting
 
-## Code Blocks and Inline Code
+Or use parenthesis markers:
 
-### Inline Code
-Here is an example of inline code: `print("Hello, world!")`.
+1) First
+2) Second
 
-### Fenced Code Block (Python)
-```python
-def greet(name):
-    """
-    Greets a person with the provided name.
-    """
-    print(f"Hello, {name}!")
+- [x] Task done
+- [ ] Task to do
 
-greet("Alice")
-```
+(x) Selected option
+( ) Other option
 
-### Fenced Code Block (JavaScript)
-```javascript
-function greet(name) {
-    console.log(`Hello, ${name}!`);
-}
-greet("Bob");
-```
-
----
+- Block maths in a list: \[ a^2 + b^2 = c^2 \]
 
 ## Tables
 
-Here is a table demonstrating various elements:
+| Left | Center | Right |
+|:-----|:------:|------:|
+| a    | b      | c     |
+| **bold** | `code` | \( x^2 \) |
 
-| Syntax      | Description                              | Example                           |
-| ----------- | ---------------------------------------- | --------------------------------- |
-| Header      | Title                                    | **Bold Header**                   |
-| Paragraph   | Text with *italic* and **bold** elements | This is a sample paragraph.       |
-| Inline Code | `code snippet`                           | `let x = 10;`                     |
+A `|` inside maths or code belongs to the cell:
 
-Additional table with alignment:
+| Complex Number | Modulus (\(|z|\)) | Code   |
+|----------------|--------------------|--------|
+| \(3 + 4i\)     | 5                  | `a|b`  |
+| \(1 - 2i\)     | \(\sqrt{5}\)       | x \| y |
 
-| Left Align | Center Align | Right Align |
-| :--------- |:------------:| ----------:|
-| Row 1      | Row 1        | Row 1      |
-| Row 2      | Row 2        | Row 2      |
+## Quotes
 
----
-
-## Blockquotes and Nested Elements
-
-> **Blockquote Header**
+> A block quote.
 >
-> This is a blockquote. You can include **bold** and *italic* text, as well as `inline code` within blockquotes.
->
-> > ### Nested Blockquote
-> > - Nested list item 1
-> > - Nested list item 2
-> >   1. Numbered subitem 1
-> >   2. Numbered subitem 2
-> >
-> > ```python
-> > # Code snippet inside nested blockquote
-> > for i in range(3):
-> >     print(i)
-> > ```
->
-> Back to the outer blockquote.
+> > A nested quote.
+
+## Alerts
+
+> [!NOTE]
+> Highlights information that users should take into account, even when skimming.
+
+> [!TIP]
+> Optional information to help a user be more successful.
+
+> [!IMPORTANT]
+> Crucial information necessary for users to succeed.
+
+> [!WARNING]
+> Critical content demanding immediate user attention due to potential risks.
+
+> [!CAUTION]
+> Negative potential consequences of an action.
+
+## CommonMark details
+
+These follow the CommonMark 0.31.2 spec, which the package is tested
+against.
+
+The number of windows in my house is
+14. The number of doors is 6 — prose, not a list.
+
+- A line directly after an item
+continues that item.
+- Changing the bullet character…
++ …starts a new list.
+
+Nesting emphasis: *italic **bold-italic*** and _a _b_ c_.
+**Note:**text stays bold, but a*"quoted"* single star does not.
+
+An image as a link label: [![badge](https://img.shields.io/badge/pub-gpt__markdown-blue)](https://pub.dev/packages/gpt_markdown)
+
+Links do not nest: [outer [inner](https://dart.dev)](https://flutter.dev).
+
+A stray \[ is just a bracket, and \(\) is two parentheses.
+
+Every HTML5 entity: &HilbertSpace; &ClockwiseContourIntegral; &DoubleLongRightArrow;
+
+## HTML
+
+Common tags render: <b>bold</b>, <i>italic</i>, <s>struck</s>, <u>underline</u>,
+<code>code</code>, <kbd>Ctrl</kbd> + <kbd>C</kbd>, E = mc<sup>2</sup>, H<sub>2</sub>O,
+<mark>highlighted</mark>, a line<br>break, <a href="https://gptmarkdown.com" title="Home">a link</a>,
+and an image <img src="https://raw.githubusercontent.com/useval/gpt_markdown/main/screenshots/math.png" width="80">.
+Unknown tags, like <blink>this</blink>, stay text, and so does an unclosed <b> tag.
+
+<h3>An HTML heading</h3>
+
+<blockquote>
+An HTML quote, with **Markdown** inside.
+</blockquote>
+
+<table>
+<thead><tr><th align="left">HTML</th><th align="center">Renders as</th><th align="right">Since</th></tr></thead>
+<tr><td><code>&lt;table&gt;</code></td><td align="center">this table</td><td align="right">1.4</td></tr>
+<tr><td><code>&lt;ul&gt;</code></td><td align="center">a list<br>with a break</td><td align="right">1.4</td></tr>
+</table>
+
+<ol start="3">
+<li>An HTML list starting at three</li>
+<li>With a nested one:
+<ul><li>bullet</li><li><input type="checkbox" checked> HTML task item</li></ul>
+</li>
+</ol>
+
+<pre><code class="language-js">const html = "&lt;pre&gt; becomes a code block";
+</code></pre>
+
+<details>
+<summary>A details block (switch on "Custom tags" to collapse it)</summary>
+
+Hidden **Markdown** content.
+
+</details>
+
+<div align="center">
+
+**Wrapper tags vanish; the Markdown inside renders.**
+
+</div>
+
+<script>alert('a closed script is hidden')</script>
+
+## Custom HTML tags
+
+Turn on "Custom tags" in the toolbar: these come from an app's `htmlTags`.
+Off, the unknown ones stay text.
+
+Status: <badge color="green">stable</badge> <badge color="red">breaking</badge> <badge>beta</badge>
+
+<callout type="tip">
+A **callout** of the app's own, wrapping Markdown — even a list:
+
+- one
+- two
+</callout>
+
+## Horizontal rules
 
 ---
 
-## Mathematical Expressions
+***
 
-### Inline Math
-You can write inline math using the `\( ... \)` syntax. For example, the quadratic formula is given by:
-\( x = \frac{-b \pm \sqrt{b^2-4ac}}{2a} \).
+___
 
-### Display Math
-Display math can be rendered using the `\[ ... \]` syntax. For example, consider the integral:
-\[
-\int_{-\infty}^{\infty} e^{-x^2} \, dx = \sqrt{\pi}
-\]
+> Visit [gptmarkdown.com](https://gptmarkdown.com) for the interactive playground.
+''';
 
-More complex display equations:
-\[
-E = mc^2 \quad \text{and} \quad F = ma
-\]
+class ExamplePage extends StatefulWidget {
+  const ExamplePage({super.key, this.onToggleTheme});
 
----
+  /// Flips the app between light and dark.
+  final VoidCallback? onToggleTheme;
 
-## Links and Images
+  @override
+  State<ExamplePage> createState() => _ExamplePageState();
+}
 
-### Links
-Here are examples of links:
-- [OpenAI](https://www.openai.com)
-- [GitHub](https://github.com)
+class _ExamplePageState extends State<ExamplePage> {
+  late final TextEditingController _controller = TextEditingController(
+    text: _markdown,
+  )..addListener(() => setState(() {}));
 
-### Images
-Inline images can be embedded as follows:
-![Alt Text for Image](https://via.placeholder.com/150 "Image Title")
+  /// True renders with plusparse (the single-pass character scanner), false
+  /// with the legacy regex pipeline. Defaults to plusparse.
+  bool _incremental = true;
 
-Images can also be referenced with links:
-[![Linked Image](https://via.placeholder.com/100 "Thumbnail")](https://via.placeholder.com/500 "Full Image")
+  /// Lets `$…$` and `$$…$$` open maths. On by default so the sample's dollar
+  /// examples render.
+  bool _useDollar = true;
 
----
+  TextDirection _textDirection = TextDirection.ltr;
 
-## Footnotes
+  /// Which tour is in the editor: the English one, or the Arabic one that
+  /// exercises right-to-left layout.
+  bool _arabic = false;
 
-Here is a statement with a footnote.[^1] Another reference can be added here.[^long]
+  /// The text scale the preview renders at, as a reader's accessibility
+  /// setting would set it.
+  double _scale = 1.0;
 
-[^1]: This is a simple footnote.
-[^long]: This footnote contains a longer explanation to showcase how multiple lines can be formatted in a footnote. It supports Markdown formatting such as **bold** and *italic* text.
+  /// `GptMarkdown.html`: off, every tag is shown as written.
+  bool _html = true;
 
----
+  /// `GptMarkdown.htmlTags`: the app-defined tags in [demoHtmlTags].
+  bool _customTags = false;
 
-## Horizontal Rules and Miscellaneous
+  static const _scales = <double>[0.85, 1.0, 1.3, 1.5, 2.0, 3.0];
 
-Horizontal rules can be used to separate sections:
-
----
-
-### Task List Example
-- [x] Write complex Markdown document
-- [x] Include LaTeX math expressions
-- [ ] Add more Markdown components if needed
-
-### Nested Quotes with Code and Math
-> **Example of Nested Components**
->
-> - Inline code: `sum = a + b`
-> - Math expression: \( \sum_{i=1}^n i = \frac{n(n+1)}{2} \)
-> - More text with **bold** formatting.
->
-> ```javascript
-> // JavaScript code example inside a nested blockquote
-> const sum = (n) => (n * (n + 1)) / 2;
-> console.log(sum(10));
-> ```
-
----
-
-## Conclusion
-
-This document was created to test the robustness of Markdown parsers and to ensure that all components, including advanced LaTeX expressions and nested structures, are rendered correctly. Enjoy testing and feel free to extend it further!
-```
-''',
-  );
-  File? file;
-
-  loadContent() async {
-    File? file = this.file;
-    if (file == null) {
-      return;
-    }
-    String content = await file.readAsString();
-    _controller.text = content;
-  }
-
-  updateContent(String contents) async {
-    //
-    await file?.writeAsString(contents);
-  }
-
-  load() async {
-    await loadContent();
-    String? path = file?.path;
-    if (path == null) {
-      return;
-    }
-    FileWatcher(path).events.listen((details) {
-      loadContent();
+  void _setSample(bool arabic) {
+    setState(() {
+      _arabic = arabic;
+      _textDirection = arabic ? TextDirection.rtl : TextDirection.ltr;
+      _controller.text = arabic ? rtlShowcaseMarkdown : _markdown;
     });
   }
 
-  bool writingMod = true;
-  bool selectable = false;
-  bool useDollarSignsForLatex = false;
+  void _toggleTextDirection() {
+    setState(() {
+      const values = TextDirection.values;
+      final length = values.length;
+      _textDirection = values[(_textDirection.index + 1) % length];
+    });
+  }
 
   @override
-  Widget build(BuildContext context) {
-//     var data = '''|asdfasfd|asdfasf|
-// |---|---|
-// |sohag|asdfasf|
-// |asdfasf|asdfasf|
-// ''';
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
-    return GptMarkdownTheme(
-      gptThemeData: GptMarkdownTheme.of(context).copyWith(
-        highlightColor: Colors.purple,
-      ),
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-          actions: [
-            IconButton(
-              onPressed: () {
-                setState(() {
-                  useDollarSignsForLatex = !useDollarSignsForLatex;
-                });
-              },
-              icon: Icon(
-                Icons.monetization_on_outlined,
-                color: useDollarSignsForLatex
-                    ? Theme.of(context).colorScheme.onSurfaceVariant
-                    : Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.38),
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                setState(() {
-                  selectable = !selectable;
-                });
-              },
-              icon: Icon(
-                Icons.select_all_outlined,
-                color: selectable
-                    ? Theme.of(context).colorScheme.onSurfaceVariant
-                    : Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.38),
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                setState(() {
-                  _direction = TextDirection.values[(_direction.index + 1) % 2];
-                });
-              },
-              icon: const [Text("LTR"), Text("RTL")][_direction.index],
-            ),
-            IconButton(
-              onPressed: widget.onPressed,
-              icon: const Icon(Icons.sunny),
-            ),
-            IconButton(
-              onPressed: () => setState(() {
-                writingMod = !writingMod;
-              }),
-              icon: Icon(
-                  writingMod ? Icons.arrow_drop_down : Icons.arrow_drop_up),
-            ),
-          ],
+  Widget _editor() => TextField(
+        controller: _controller,
+        maxLines: null,
+        expands: true,
+        textAlignVertical: TextAlignVertical.top,
+        style:
+            const TextStyle(fontFamily: 'monospace', fontSize: 13, height: 1.4),
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(),
+          hintText: 'Type Markdown here…',
+          contentPadding: EdgeInsets.all(12),
         ),
-        body: DropTarget(
-          onDragDone: (details) {
-            var files = details.files;
-            if (files.length != 1) {
-              return;
-            }
-            var file = files[0];
-            String path = file.path;
-            this.file = File(path);
-            load();
-          },
-          child: Stack(
+      );
+
+  Widget _preview() => SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: GptMarkdown(
+          _controller.text,
+          // Both parsers are reachable so the two can be compared on the same
+          // input; see the "Parser" switch in the toolbar.
+          textDirection: _textDirection,
+          textScaler: TextScaler.linear(_scale),
+          // ignore: deprecated_member_use
+          incremental: _incremental,
+          useDollarSignsForLatex: _useDollar,
+          html: _html,
+          htmlTags: _customTags ? demoHtmlTags : null,
+          // The Arabic tour's `@librarian`, `:ready:`, `{{…}}` and offline
+          // images.
+          inlinePatterns: _arabic ? rtlInlinePatterns : null,
+          inlineDirectives: _arabic ? rtlInlineDirectives : null,
+          imageBuilder: _arabic ? rtlImageBuilder : null,
+          onLinkTap: (url, title) => debugPrint('Link tapped: $url'),
+        ),
+      );
+
+  Widget _toolbar() => Material(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 4,
             children: [
-              Column(
-                children: [
-                  Expanded(
-                    child: ListView(
-                      children: [
-                        ListenableBuilder(
-                          listenable: _controller,
-                          builder: (context, _) {
-                            var data = _controller.text;
-                            return Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                    width: 1,
-                                    color:
-                                        Theme.of(context).colorScheme.outline),
-                              ),
-                              child: Theme(
-                                data: Theme.of(context),
-                                // .copyWith(
-                                //   textTheme: const TextTheme(
-                                //     // For H1.
-                                //     headlineLarge: TextStyle(fontSize: 55),
-                                //     // For H2.
-                                //     headlineMedium: TextStyle(fontSize: 45),
-                                //     // For H3.
-                                //     headlineSmall: TextStyle(fontSize: 35),
-                                //     // For H4.
-                                //     titleLarge: TextStyle(fontSize: 25),
-                                //     // For H5.
-                                //     titleMedium: TextStyle(fontSize: 15),
-                                //     // For H6.
-                                //     titleSmall: TextStyle(fontSize: 10),
-                                //   ),
-                                // ),
-                                child: Builder(
-                                  builder: (context) {
-                                    Widget child = GptMarkdown(
-                                      data,
-                                      textDirection: _direction,
-                                      onLinkTap: (url, title) {
-                                        debugPrint(url);
-                                        debugPrint(title);
-                                      },
-                                      useDollarSignsForLatex:
-                                          useDollarSignsForLatex,
-                                      textAlign: TextAlign.justify,
-                                      textScaler: const TextScaler.linear(1),
-                                      style: const TextStyle(
-                                          // fontFamily: 'monospace',
-                                          // fontWeight: FontWeight.bold,
-                                          ),
-                                      highlightBuilder: (context, text, style) {
-                                        return Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 4, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .secondaryContainer,
-                                            borderRadius:
-                                                BorderRadius.circular(4),
-                                            border: Border.all(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .secondary
-                                                  .withValues(alpha: 0.5),
-                                              width: 1,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            text,
-                                            style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onSecondaryContainer,
-                                              fontFamily: 'monospace',
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: style.fontSize != null
-                                                  ? style.fontSize! * 0.9
-                                                  : 13.5,
-                                              height: style.height,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      latexWorkaround: (tex) {
-                                        List<String> stack = [];
-                                        tex = tex.splitMapJoin(
-                                          RegExp(r"\\text\{|\{|\}|\_"),
-                                          onMatch: (p) {
-                                            String input = p[0] ?? "";
-                                            if (input == r"\text{") {
-                                              stack.add(input);
-                                            }
-                                            if (stack.isNotEmpty) {
-                                              if (input == r"{") {
-                                                stack.add(input);
-                                              }
-                                              if (input == r"}") {
-                                                stack.removeLast();
-                                              }
-                                              if (input == r"_") {
-                                                return r"\_";
-                                              }
-                                            }
-                                            return input;
-                                          },
-                                        );
-                                        return tex.replaceAllMapped(
-                                            RegExp(r"align\*"),
-                                            (match) => "aligned");
-                                      },
-                                      // imageBuilder: (context, url) {
-                                      //   return Image.network(
-                                      //     url,
-                                      //     width: 100,
-                                      //     height: 100,
-                                      //   );
-                                      // },
-                                      latexBuilder:
-                                          (context, tex, textStyle, inline) {
-                                        if (tex.contains(r"\begin{tabular}")) {
-                                          // return table.
-                                          String tableString = "|${(RegExp(
-                                                r"^\\begin\{tabular\}\{.*?\}(.*?)\\end\{tabular\}$",
-                                                multiLine: true,
-                                                dotAll: true,
-                                              ).firstMatch(tex)?[1] ?? "").trim()}|";
-                                          tableString = tableString
-                                              .replaceAll(r"\\", "|\n|")
-                                              .replaceAll(r"\hline", "")
-                                              .replaceAll(
-                                                  RegExp(r"(?<!\\)&"), "|");
-                                          var tableStringList = tableString
-                                              .split("\n")
-                                            ..insert(1, "|---|");
-                                          tableString =
-                                              tableStringList.join("\n");
-                                          return GptMarkdown(tableString);
-                                        }
-                                        var controller = ScrollController();
-                                        Widget child = Math.tex(
-                                          tex,
-                                          textStyle: textStyle,
-                                        );
-                                        if (!inline) {
-                                          child = Padding(
-                                            padding: const EdgeInsets.all(0.0),
-                                            child: Material(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onInverseSurface,
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Scrollbar(
-                                                  controller: controller,
-                                                  child: SingleChildScrollView(
-                                                    controller: controller,
-                                                    scrollDirection:
-                                                        Axis.horizontal,
-                                                    child: Math.tex(
-                                                      tex,
-                                                      textStyle: textStyle,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                        child = SelectableAdapter(
-                                          selectedText: tex,
-                                          child: Math.tex(tex),
-                                        );
-                                        child = InkWell(
-                                          onTap: () {
-                                            debugPrint("Hello world");
-                                          },
-                                          child: child,
-                                        );
-                                        return child;
-                                      },
-                                      sourceTagBuilder:
-                                          (buildContext, string, textStyle) {
-                                        var value = int.tryParse(string);
-                                        value ??= -1;
-                                        value += 1;
-                                        return SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              color: Colors.red,
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                            ),
-                                            child:
-                                                Center(child: Text("$value")),
-                                          ),
-                                        );
-                                      },
-                                      linkBuilder:
-                                          (context, label, path, style) {
-                                        return Text.rich(
-                                          label,
-                                          style: style.copyWith(
-                                            color: Colors.blue,
-                                          ),
-                                        );
-                                      },
-
-                                      // tableBuilder: (context, tableRows,
-                                      //     textStyle, config) {
-                                      //   return Table(
-                                      //     border: TableBorder.all(
-                                      //       width: 1,
-                                      //       color: Colors.red,
-                                      //     ),
-                                      //     children: tableRows.map((e) {
-                                      //       return TableRow(
-                                      //         children: e.fields.map((e) {
-                                      //           return Text(e.data);
-                                      //         }).toList(),
-                                      //       );
-                                      //     }).toList(),
-                                      //   );
-                                      // },
-
-                                      // components: [
-                                      //   CodeBlockMd(),
-                                      //   NewLines(),
-                                      //   BlockQuote(),
-                                      //   ImageMd(),
-                                      //   ATagMd(),
-                                      //   TableMd(),
-                                      //   HTag(),
-                                      //   UnOrderedList(),
-                                      //   OrderedList(),
-                                      //   RadioButtonMd(),
-                                      //   CheckBoxMd(),
-                                      //   HrLine(),
-                                      //   StrikeMd(),
-                                      //   BoldMd(),
-                                      //   ItalicMd(),
-                                      //   LatexMath(),
-                                      //   LatexMathMultiLine(),
-                                      //   HighlightedText(),
-                                      //   SourceTag(),
-                                      //   IndentMd(),
-                                      // ],
-                                      // inlineComponents: [
-                                      //   ImageMd(),
-                                      //   ATagMd(),
-                                      //   TableMd(),
-                                      //   StrikeMd(),
-                                      //   BoldMd(),
-                                      //   ItalicMd(),
-                                      //   LatexMath(),
-                                      //   LatexMathMultiLine(),
-                                      //   HighlightedText(),
-                                      //   SourceTag(),
-                                      // ],
-                                      // codeBuilder: (context, name, code, closed) {
-                                      //   return Padding(
-                                      //     padding: const EdgeInsets.symmetric(
-                                      //         horizontal: 16),
-                                      //     child: Text(
-                                      //       code.trim(),
-                                      //       style: TextStyle(
-                                      //         fontFamily: 'JetBrains Mono',
-                                      //         fontSize: 14,
-                                      //         height: 1.5,
-                                      //         color: Theme.of(context)
-                                      //             .colorScheme
-                                      //             .onSurface,
-                                      //       ),
-                                      //     ),
-                                      //   );
-                                      // }
-                                    );
-                                    if (selectable) {
-                                      child = SelectionArea(
-                                        child: child,
-                                      );
-                                    }
-                                    return child;
-                                  },
-                                ),
-                                // child: const Text("Hello"),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (writingMod)
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxHeight: 400),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextField(
-                          decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              label: Text("Type here:")),
-                          maxLines: null,
-                          controller: _controller,
-                        ),
-                      ),
-                    ),
+              const Text('Sample:'),
+              DropdownButton<bool>(
+                key: const ValueKey('sample'),
+                value: _arabic,
+                underline: const SizedBox.shrink(),
+                items: const [
+                  DropdownMenuItem(value: false, child: Text('English tour')),
+                  DropdownMenuItem(
+                      value: true, child: Text('Arabic (RTL) tour')),
                 ],
+                onChanged: (v) => _setSample(v!),
+              ),
+              const SizedBox(width: 16),
+              const Text('Text scale:'),
+              DropdownButton<double>(
+                key: const ValueKey('scale'),
+                value: _scale,
+                underline: const SizedBox.shrink(),
+                items: [
+                  for (final s in _scales)
+                    DropdownMenuItem(value: s, child: Text('${s}x')),
+                ],
+                onChanged: (v) => setState(() => _scale = v!),
+              ),
+              const SizedBox(width: 16),
+              const Text('TextDirection:'),
+              TextButton(
+                onPressed: _toggleTextDirection,
+                child: Text(
+                  _textDirection.name,
+                ),
+              ),
+              const Text('Parser:'),
+              Switch(
+                value: _incremental,
+                onChanged: (v) => setState(() => _incremental = v),
+              ),
+              Text(_incremental ? 'plusparse' : 'legacy regex'),
+              const SizedBox(width: 16),
+              const Text(r'$…$ math:'),
+              Switch(
+                value: _useDollar,
+                onChanged: (v) => setState(() => _useDollar = v),
+              ),
+              const SizedBox(width: 16),
+              const Text('HTML:'),
+              Switch(
+                key: const ValueKey('html'),
+                value: _html,
+                onChanged: (v) => setState(() => _html = v),
+              ),
+              const SizedBox(width: 16),
+              const Text('Custom tags:'),
+              Switch(
+                key: const ValueKey('custom-tags'),
+                value: _customTags,
+                onChanged: (v) => setState(() => _customTags = v),
+              ),
+              const SizedBox(width: 16),
+              TextButton.icon(
+                icon: const Icon(Icons.restart_alt_rounded, size: 18),
+                label: const Text('Reset'),
+                onPressed: () => _setSample(_arabic),
               ),
             ],
           ),
         ),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('gpt_markdown'),
+        actions: [
+          DemoThemeButton(onToggle: widget.onToggleTheme),
+          IconButton(
+            tooltip: 'Maths & LaTeX demo',
+            icon: const Icon(Icons.functions_rounded),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const MathPage()),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Streaming demo',
+            icon: const Icon(Icons.auto_awesome_rounded),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const StreamingPage()),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Text scaling demo',
+            icon: const Icon(Icons.format_size_rounded),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const TextScalePage()),
+            ),
+          ),
+          IconButton(
+            tooltip: 'RTL block alignment demo',
+            icon: const Icon(Icons.format_textdirection_r_to_l),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const RtlPage()),
+            ),
+          ),
+          IconButton(
+            tooltip: 'maxLines demo',
+            icon: const Icon(Icons.short_text_rounded),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const MaxLinesPage()),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Selection demo',
+            icon: const Icon(Icons.text_fields_rounded),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const SelectionPage()),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Autolinks demo',
+            icon: const Icon(Icons.link_rounded),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const AutolinkPage()),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Inline code demo',
+            icon: const Icon(Icons.code_rounded),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const InlineCodePage()),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Alerts demo',
+            icon: const Icon(Icons.campaign_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const AlertsPage()),
+            ),
+          ),
+          IconButton(
+            tooltip: 'HTML tags demo',
+            icon: const Icon(Icons.html_rounded),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const HtmlGalleryPage()),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Inline patterns demo',
+            icon: const Icon(Icons.alternate_email_rounded),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const InlinePatternsPage(),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          _toolbar(),
+          const Divider(height: 1),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Side by side when there is room, stacked when there is not.
+                if (constraints.maxWidth >= 900) {
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: _editor(),
+                        ),
+                      ),
+                      const VerticalDivider(width: 1),
+                      Expanded(child: _preview()),
+                    ],
+                  );
+                }
+                return Column(
+                  children: [
+                    SizedBox(
+                      height: 220,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: _editor(),
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    Expanded(child: _preview()),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

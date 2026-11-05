@@ -1,0 +1,89 @@
+name: Bug report
+description: Something renders wrong, crashes, or behaves unexpectedly.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this. The fastest fix comes from
+        the smallest Markdown that still shows the problem.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: What you see, and what you expected to see instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: markdown
+    attributes:
+      label: Markdown that reproduces it
+      description: The smallest input that still shows the problem. Paste it as-is.
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: code
+    attributes:
+      label: Widget code
+      description: >-
+        How you build `GptMarkdown` — its arguments, any `styleSheet`,
+        builders, or custom components, and what it sits inside (a `Column`,
+        a chat bubble, `IntrinsicWidth`, …).
+      render: dart
+      placeholder: |
+        GptMarkdown(
+          text,
+          style: const TextStyle(fontSize: 15),
+        )
+    validations:
+      required: true
+
+  - type: input
+    id: package-version
+    attributes:
+      label: gpt_markdown version
+      placeholder: "1.3.4"
+    validations:
+      required: true
+
+  - type: textarea
+    id: flutter-version
+    attributes:
+      label: Flutter version
+      description: Paste the output of `flutter --version`.
+      render: text
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: platforms
+    attributes:
+      label: Platforms where it happens
+      options:
+        - label: Android
+        - label: iOS
+        - label: Web
+        - label: macOS
+        - label: Windows
+        - label: Linux
+
+  - type: checkboxes
+    id: context
+    attributes:
+      label: Does any of this apply?
+      description: These change which code path renders your text.
+      options:
+        - label: I pass `components` or `inlineComponents` (the legacy renderer)
+        - label: The text is streamed in (`isStreaming`, `animation`, or updated as it arrives)
+        - label: I use `SliverGptMarkdown`
+        - label: Text scaling is above 1x, or the text is right-to-left
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots, logs, anything else
+      description: Error messages, stack traces, or a screenshot of the wrong output.

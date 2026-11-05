@@ -12,8 +12,12 @@ class GptMarkdownThemeData extends ThemeExtension<GptMarkdownThemeData> {
     required this.h6,
     required this.hrLineThickness,
     required this.hrLineColor,
+    required this.hrLinePadding,
     required this.linkColor,
     required this.linkHoverColor,
+    required this.autoAddDividerLineAfterH1,
+    required this.inlineCode,
+    required this.styleSheet,
   });
 
   /// A factory constructor for `GptMarkdownThemeData`.
@@ -28,8 +32,12 @@ class GptMarkdownThemeData extends ThemeExtension<GptMarkdownThemeData> {
     TextStyle? h6,
     double? hrLineThickness,
     Color? hrLineColor,
+    EdgeInsets? hrLinePadding,
     Color? linkColor,
     Color? linkHoverColor,
+    bool? autoAddDividerLineAfterH1,
+    InlineCodeStyle? inlineCode,
+    GptMarkdownStyleSheet? styleSheet,
   }) {
     ThemeData themeData = switch (brightness) {
       Brightness.light => ThemeData.light(),
@@ -66,8 +74,22 @@ class GptMarkdownThemeData extends ThemeExtension<GptMarkdownThemeData> {
       h6: h6,
       hrLineThickness: hrLineThickness,
       hrLineColor: hrLineColor,
+      hrLinePadding: hrLinePadding,
       linkColor: linkColor,
       linkHoverColor: linkHoverColor,
+      autoAddDividerLineAfterH1: autoAddDividerLineAfterH1,
+      // Resolving here means a caller can set one field — a colour, a font —
+      // and keep the scheme-derived defaults for everything else.
+      //
+      // `highlightColor` used to be the whole of inline-code styling, so an app
+      // that set it and nothing else keeps its colour as the chip fill.
+      inlineCode:
+          (inlineCode ??
+                  (highlightColor == null
+                      ? null
+                      : InlineCodeStyle(backgroundColor: highlightColor)))
+              ?.resolve(themeData.colorScheme),
+      styleSheet: styleSheet,
     );
   }
 
@@ -85,8 +107,12 @@ class GptMarkdownThemeData extends ThemeExtension<GptMarkdownThemeData> {
       h6: textTheme.titleSmall,
       hrLineThickness: 1,
       hrLineColor: theme.colorScheme.outline,
+      hrLinePadding: EdgeInsets.zero,
       linkColor: Colors.blue,
       linkHoverColor: Colors.red,
+      autoAddDividerLineAfterH1: true,
+      inlineCode: const InlineCodeStyle().resolve(theme.colorScheme),
+      styleSheet: const GptMarkdownStyleSheet(),
     );
   }
 
@@ -115,11 +141,31 @@ class GptMarkdownThemeData extends ThemeExtension<GptMarkdownThemeData> {
   /// The color of the horizontal line.
   Color hrLineColor;
 
+  /// Padding around horizontal rules and the h1 follow-up divider line.
+  EdgeInsets hrLinePadding;
+
   /// The color of the link.
   Color linkColor;
 
   /// The color of the link when hovering.
   Color linkHoverColor;
+
+  /// Whether to insert a horizontal divider after `#` (h1) headings.
+  bool autoAddDividerLineAfterH1;
+
+  /// Per-component appearance for the whole app.
+  ///
+  /// Fields left unset here fall back to the package defaults. A style sheet
+  /// on the widget wins over this one field by field, so a widget can override
+  /// one value without discarding the rest of the app's styling.
+  GptMarkdownStyleSheet styleSheet;
+
+  /// How inline `code` is drawn.
+  ///
+  /// Always fully resolved — every field is non-null. Pass a partial
+  /// [InlineCodeStyle] to the [GptMarkdownThemeData] factory and the rest is
+  /// filled in from the ambient [ColorScheme].
+  InlineCodeStyle inlineCode;
 
   /// A method to copy the `GptMarkdownThemeData`.
   @override
@@ -133,8 +179,12 @@ class GptMarkdownThemeData extends ThemeExtension<GptMarkdownThemeData> {
     TextStyle? h6,
     double? hrLineThickness,
     Color? hrLineColor,
+    EdgeInsets? hrLinePadding,
     Color? linkColor,
     Color? linkHoverColor,
+    bool? autoAddDividerLineAfterH1,
+    InlineCodeStyle? inlineCode,
+    GptMarkdownStyleSheet? styleSheet,
   }) {
     return GptMarkdownThemeData._(
       highlightColor: highlightColor ?? this.highlightColor,
@@ -146,9 +196,33 @@ class GptMarkdownThemeData extends ThemeExtension<GptMarkdownThemeData> {
       h6: h6 ?? this.h6,
       hrLineThickness: hrLineThickness ?? this.hrLineThickness,
       hrLineColor: hrLineColor ?? this.hrLineColor,
+      hrLinePadding: hrLinePadding ?? this.hrLinePadding,
       linkColor: linkColor ?? this.linkColor,
       linkHoverColor: linkHoverColor ?? this.linkHoverColor,
+      autoAddDividerLineAfterH1:
+          autoAddDividerLineAfterH1 ?? this.autoAddDividerLineAfterH1,
+      inlineCode: inlineCode ?? this.inlineCode,
+      styleSheet: styleSheet ?? this.styleSheet,
     );
+  }
+
+  /// Whether every field matches [other].
+  bool isSame(GptMarkdownThemeData other) {
+    return highlightColor == other.highlightColor &&
+        h1 == other.h1 &&
+        h2 == other.h2 &&
+        h3 == other.h3 &&
+        h4 == other.h4 &&
+        h5 == other.h5 &&
+        h6 == other.h6 &&
+        hrLineThickness == other.hrLineThickness &&
+        hrLineColor == other.hrLineColor &&
+        hrLinePadding == other.hrLinePadding &&
+        linkColor == other.linkColor &&
+        linkHoverColor == other.linkHoverColor &&
+        autoAddDividerLineAfterH1 == other.autoAddDividerLineAfterH1 &&
+        inlineCode == other.inlineCode &&
+        styleSheet == other.styleSheet;
   }
 
   @override
@@ -170,9 +244,20 @@ class GptMarkdownThemeData extends ThemeExtension<GptMarkdownThemeData> {
         end: other.hrLineThickness,
       ).transform(t),
       hrLineColor: Color.lerp(hrLineColor, other.hrLineColor, t) ?? hrLineColor,
+      hrLinePadding:
+          EdgeInsets.lerp(hrLinePadding, other.hrLinePadding, t) ??
+          hrLinePadding,
       linkColor: Color.lerp(linkColor, other.linkColor, t) ?? linkColor,
       linkHoverColor:
           Color.lerp(linkHoverColor, other.linkHoverColor, t) ?? linkHoverColor,
+      autoAddDividerLineAfterH1: t < 0.5
+          ? autoAddDividerLineAfterH1
+          : other.autoAddDividerLineAfterH1,
+      inlineCode:
+          InlineCodeStyle.lerp(inlineCode, other.inlineCode, t) ?? inlineCode,
+      styleSheet:
+          GptMarkdownStyleSheet.lerp(styleSheet, other.styleSheet, t) ??
+          styleSheet,
     );
   }
 }
@@ -189,8 +274,8 @@ class GptMarkdownTheme extends InheritedWidget {
   /// A method to get the `GptMarkdownThemeData` from the `BuildContext`.
   static GptMarkdownThemeData of(BuildContext context) {
     var theme = Theme.of(context);
-    final provider =
-        context.dependOnInheritedWidgetOfExactType<GptMarkdownTheme>();
+    final provider = context
+        .dependOnInheritedWidgetOfExactType<GptMarkdownTheme>();
     if (provider != null) {
       return provider.gptThemeData;
     }
