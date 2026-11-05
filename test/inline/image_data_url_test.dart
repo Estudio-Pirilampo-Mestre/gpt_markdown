@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gpt_markdown/custom_widgets/custom_error_image.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Issue #32: an image whose URL is a `data:` URL —
 /// `![](data:image/png;base64,...)` — went to `NetworkImage`, which cannot

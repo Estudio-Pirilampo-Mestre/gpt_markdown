@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:gpt_markdown/custom_widgets/bidi_rich_text.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A builder function for the ordered list.
 typedef OrderedListBuilder =

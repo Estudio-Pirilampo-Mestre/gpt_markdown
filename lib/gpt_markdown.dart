@@ -1,92 +1,30 @@
-import 'custom_widgets/markdown_text_scaling.dart';
-export 'custom_widgets/markdown_text_scaling.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:gpt_markdown/custom_widgets/markdown_config.dart';
-import 'package:gpt_markdown/custom_widgets/html_tag.dart';
-
-// `GptMarkdownConfig` and the builder typedefs are part of the public API —
-// custom components receive a config and consumers pass builders in.
-export 'package:gpt_markdown/custom_widgets/markdown_config.dart';
-
-// Inline `code` styling is configured by consumers.
-export 'package:gpt_markdown/custom_widgets/inline_code.dart';
-export 'package:gpt_markdown/custom_widgets/inline_tap.dart';
-export 'package:gpt_markdown/custom_widgets/html_tag.dart';
-
-// Reveal animation for streamed replies.
-export 'package:gpt_markdown/streaming/streaming_markdown.dart';
-export 'package:gpt_markdown/streaming/reveal_engine.dart';
-export 'package:gpt_markdown/streaming/inline_hold.dart';
-export 'package:gpt_markdown/streaming/reveal_effect.dart';
-export 'package:gpt_markdown/streaming/reveal_spans.dart';
-export 'package:gpt_markdown/streaming/block_entrance.dart';
-export 'package:gpt_markdown/streaming/stream_split.dart';
-
-// Per-component appearance.
-export 'package:gpt_markdown/styles/alert_style.dart';
-export 'package:gpt_markdown/styles/block_quote_style.dart';
-export 'package:gpt_markdown/styles/heading_style.dart';
-export 'package:gpt_markdown/styles/link_style.dart';
-export 'package:gpt_markdown/styles/list_style.dart';
-export 'package:gpt_markdown/styles/checkbox_style.dart';
-export 'package:gpt_markdown/styles/code_block_style.dart';
-export 'package:gpt_markdown/styles/table_style.dart';
-export 'package:gpt_markdown/styles/image_style.dart';
-export 'package:gpt_markdown/styles/hr_style.dart';
-export 'package:gpt_markdown/styles/source_tag_style.dart';
-export 'package:gpt_markdown/styles/latex_style.dart';
-export 'package:gpt_markdown/styles/highlight_style.dart';
-export 'package:gpt_markdown/styles/script_style.dart';
-export 'package:gpt_markdown/styles/gpt_markdown_style_sheet.dart';
-
-import 'package:flutter/foundation.dart';
-import 'package:gpt_markdown/custom_widgets/custom_divider.dart';
-import 'package:gpt_markdown/custom_widgets/custom_error_image.dart';
-import 'package:gpt_markdown/custom_widgets/svg_image.dart';
-import 'package:gpt_markdown/custom_widgets/custom_rb_cb.dart';
-import 'package:gpt_markdown/custom_widgets/unordered_ordered_list.dart';
+import 'dart:async';
+import 'dart:collection';
+import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:gpt_markdown/custom_widgets/custom_divider.dart';
+import 'package:gpt_markdown/custom_widgets/custom_error_image.dart';
+import 'package:gpt_markdown/custom_widgets/custom_rb_cb.dart';
+import 'package:gpt_markdown/custom_widgets/html_tag.dart';
+import 'package:gpt_markdown/custom_widgets/markdown_config.dart';
+import 'package:gpt_markdown/custom_widgets/svg_image.dart';
+import 'package:gpt_markdown/custom_widgets/unordered_ordered_list.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:val_latex_flutter/val_latex_flutter.dart'
     show Math, MathOverflow, ParseOptions, Strict;
 
 import 'custom_widgets/code_field.dart';
+import 'custom_widgets/indent_widget.dart';
 import 'custom_widgets/inline_code.dart';
 import 'custom_widgets/inline_tap.dart';
-import 'dart:async';
-import 'dart:convert';
-import 'dart:collection';
-
-import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
-
-import 'streaming/block_entrance.dart';
-import 'streaming/inline_hold.dart';
-import 'streaming/math_stream.dart';
-import 'streaming/reveal_effect.dart';
-import 'streaming/reveal_engine.dart';
-import 'streaming/reveal_spans.dart';
-import 'streaming/streaming_markdown.dart';
-import 'styles/alert_style.dart';
-import 'styles/block_quote_style.dart';
-import 'styles/heading_style.dart';
-import 'styles/link_style.dart';
-import 'styles/list_style.dart';
-import 'styles/checkbox_style.dart';
-import 'styles/code_block_style.dart';
-import 'styles/table_style.dart';
-import 'styles/image_style.dart';
-import 'styles/hr_style.dart';
-import 'styles/highlight_style.dart';
-import 'styles/script_style.dart';
-import 'styles/source_tag_style.dart';
-import 'styles/latex_style.dart';
-import 'styles/gpt_markdown_style_sheet.dart';
-import 'custom_widgets/indent_widget.dart';
 import 'custom_widgets/link_button.dart';
-
-import 'plusparse/plusparse.dart';
+import 'custom_widgets/markdown_text_scaling.dart';
 import 'plusparse/html_tags.dart' show htmlAlign;
+import 'plusparse/plusparse.dart';
 import 'plusparse/scanner.dart'
     show
         FenceOpen,
@@ -99,22 +37,77 @@ import 'plusparse/scanner.dart'
         openFenceAfter,
         quoteDepth,
         unquoted;
+import 'streaming/block_entrance.dart';
+import 'streaming/inline_hold.dart';
+import 'streaming/math_stream.dart';
+import 'streaming/reveal_effect.dart';
+import 'streaming/reveal_engine.dart';
+import 'streaming/reveal_spans.dart';
+import 'streaming/streaming_markdown.dart';
+import 'styles/alert_style.dart';
+import 'styles/block_quote_style.dart';
+import 'styles/checkbox_style.dart';
+import 'styles/code_block_style.dart';
+import 'styles/gpt_markdown_style_sheet.dart';
+import 'styles/heading_style.dart';
+import 'styles/highlight_style.dart';
+import 'styles/hr_style.dart';
+import 'styles/image_style.dart';
+import 'styles/latex_style.dart';
+import 'styles/link_style.dart';
+import 'styles/list_style.dart';
+import 'styles/script_style.dart';
+import 'styles/source_tag_style.dart';
+import 'styles/table_style.dart';
 
+export 'package:gpt_markdown/custom_widgets/html_tag.dart';
+// Inline `code` styling is configured by consumers.
+export 'package:gpt_markdown/custom_widgets/inline_code.dart';
+export 'package:gpt_markdown/custom_widgets/inline_tap.dart';
+// `GptMarkdownConfig` and the builder typedefs are part of the public API —
+// custom components receive a config and consumers pass builders in.
+export 'package:gpt_markdown/custom_widgets/markdown_config.dart';
+export 'package:gpt_markdown/streaming/block_entrance.dart';
+export 'package:gpt_markdown/streaming/inline_hold.dart';
+export 'package:gpt_markdown/streaming/reveal_effect.dart';
+export 'package:gpt_markdown/streaming/reveal_engine.dart';
+export 'package:gpt_markdown/streaming/reveal_spans.dart';
+export 'package:gpt_markdown/streaming/stream_split.dart';
+// Reveal animation for streamed replies.
+export 'package:gpt_markdown/streaming/streaming_markdown.dart';
+// Per-component appearance.
+export 'package:gpt_markdown/styles/alert_style.dart';
+export 'package:gpt_markdown/styles/block_quote_style.dart';
+export 'package:gpt_markdown/styles/checkbox_style.dart';
+export 'package:gpt_markdown/styles/code_block_style.dart';
+export 'package:gpt_markdown/styles/gpt_markdown_style_sheet.dart';
+export 'package:gpt_markdown/styles/heading_style.dart';
+export 'package:gpt_markdown/styles/highlight_style.dart';
+export 'package:gpt_markdown/styles/hr_style.dart';
+export 'package:gpt_markdown/styles/image_style.dart';
+export 'package:gpt_markdown/styles/latex_style.dart';
+export 'package:gpt_markdown/styles/link_style.dart';
+export 'package:gpt_markdown/styles/list_style.dart';
+export 'package:gpt_markdown/styles/script_style.dart';
+export 'package:gpt_markdown/styles/source_tag_style.dart';
+export 'package:gpt_markdown/styles/table_style.dart';
+
+export 'custom_widgets/markdown_text_scaling.dart';
 export 'plusparse/plusparse.dart';
 
-part 'theme.dart';
-part 'inline_pattern.dart';
-part 'block_component.dart';
 part 'autolink.dart';
-part 'markdown_component.dart';
-part 'shared_render.dart';
+part 'block_component.dart';
 part 'html_table.dart';
-part 'md_widget.dart';
 part 'inline_directive.dart';
+part 'inline_pattern.dart';
+part 'markdown_component.dart';
+part 'md_widget.dart';
 part 'plusparse/autolink_scan.dart';
-part 'plusparse/renderer.dart';
 part 'plusparse/incremental.dart';
+part 'plusparse/renderer.dart';
 part 'plusparse/sliver.dart';
+part 'shared_render.dart';
+part 'theme.dart';
 
 /// This widget create a full markdown widget as a column view.
 class GptMarkdown extends StatelessWidget {

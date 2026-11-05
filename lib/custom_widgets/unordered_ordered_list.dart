@@ -1,8 +1,9 @@
-import 'markdown_text_scaling.dart';
 import 'dart:math' as math;
 
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
+import 'package:material_ui/material_ui.dart';
+
+import 'markdown_text_scaling.dart';
 
 /// A custom widget that displays an unordered list of items.
 ///

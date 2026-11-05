@@ -89,7 +89,7 @@ Entities decode: &amp; &lt;tag&gt; &copy; &reg; &trade; &mdash; &hellip;
 &rarr; &le; &ne; &infin; &alpha;&beta;&gamma; &#169; &#x1F680;
 
 Line one ends with a backslash\
-so this is a new line. Line three ends with two spaces  
+so this is a new line. Line three ends with two spaces
 and so does this break.
 
 <!-- This comment is hidden. Open the editor to see it. -->
@@ -400,117 +400,113 @@ class _ExamplePageState extends State<ExamplePage> {
   }
 
   Widget _editor() => TextField(
-        controller: _controller,
-        maxLines: null,
-        expands: true,
-        textAlignVertical: TextAlignVertical.top,
-        style:
-            const TextStyle(fontFamily: 'monospace', fontSize: 13, height: 1.4),
-        decoration: const InputDecoration(
-          border: OutlineInputBorder(),
-          hintText: 'Type Markdown here…',
-          contentPadding: EdgeInsets.all(12),
-        ),
-      );
+    controller: _controller,
+    maxLines: null,
+    expands: true,
+    textAlignVertical: TextAlignVertical.top,
+    style: const TextStyle(fontFamily: 'monospace', fontSize: 13, height: 1.4),
+    decoration: const InputDecoration(
+      border: OutlineInputBorder(),
+      hintText: 'Type Markdown here…',
+      contentPadding: EdgeInsets.all(12),
+    ),
+  );
 
   Widget _preview() => SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: GptMarkdown(
-          _controller.text,
-          // Both parsers are reachable so the two can be compared on the same
-          // input; see the "Parser" switch in the toolbar.
-          textDirection: _textDirection,
-          textScaler: TextScaler.linear(_scale),
-          // ignore: deprecated_member_use
-          incremental: _incremental,
-          useDollarSignsForLatex: _useDollar,
-          html: _html,
-          htmlTags: _customTags ? demoHtmlTags : null,
-          // The Arabic tour's `@librarian`, `:ready:`, `{{…}}` and offline
-          // images.
-          inlinePatterns: _arabic ? rtlInlinePatterns : null,
-          inlineDirectives: _arabic ? rtlInlineDirectives : null,
-          imageBuilder: _arabic ? rtlImageBuilder : null,
-          onLinkTap: (url, title) => debugPrint('Link tapped: $url'),
-        ),
-      );
+    padding: const EdgeInsets.all(20),
+    child: GptMarkdown(
+      _controller.text,
+      // Both parsers are reachable so the two can be compared on the same
+      // input; see the "Parser" switch in the toolbar.
+      textDirection: _textDirection,
+      textScaler: TextScaler.linear(_scale),
+      // ignore: deprecated_member_use
+      incremental: _incremental,
+      useDollarSignsForLatex: _useDollar,
+      html: _html,
+      htmlTags: _customTags ? demoHtmlTags : null,
+      // The Arabic tour's `@librarian`, `:ready:`, `{{…}}` and offline
+      // images.
+      inlinePatterns: _arabic ? rtlInlinePatterns : null,
+      inlineDirectives: _arabic ? rtlInlineDirectives : null,
+      imageBuilder: _arabic ? rtlImageBuilder : null,
+      onLinkTap: (url, title) => debugPrint('Link tapped: $url'),
+    ),
+  );
 
   Widget _toolbar() => Material(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          child: Wrap(
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 4,
-            children: [
-              const Text('Sample:'),
-              DropdownButton<bool>(
-                key: const ValueKey('sample'),
-                value: _arabic,
-                underline: const SizedBox.shrink(),
-                items: const [
-                  DropdownMenuItem(value: false, child: Text('English tour')),
-                  DropdownMenuItem(
-                      value: true, child: Text('Arabic (RTL) tour')),
-                ],
-                onChanged: (v) => _setSample(v!),
-              ),
-              const SizedBox(width: 16),
-              const Text('Text scale:'),
-              DropdownButton<double>(
-                key: const ValueKey('scale'),
-                value: _scale,
-                underline: const SizedBox.shrink(),
-                items: [
-                  for (final s in _scales)
-                    DropdownMenuItem(value: s, child: Text('${s}x')),
-                ],
-                onChanged: (v) => setState(() => _scale = v!),
-              ),
-              const SizedBox(width: 16),
-              const Text('TextDirection:'),
-              TextButton(
-                onPressed: _toggleTextDirection,
-                child: Text(
-                  _textDirection.name,
-                ),
-              ),
-              const Text('Parser:'),
-              Switch(
-                value: _incremental,
-                onChanged: (v) => setState(() => _incremental = v),
-              ),
-              Text(_incremental ? 'plusparse' : 'legacy regex'),
-              const SizedBox(width: 16),
-              const Text(r'$…$ math:'),
-              Switch(
-                value: _useDollar,
-                onChanged: (v) => setState(() => _useDollar = v),
-              ),
-              const SizedBox(width: 16),
-              const Text('HTML:'),
-              Switch(
-                key: const ValueKey('html'),
-                value: _html,
-                onChanged: (v) => setState(() => _html = v),
-              ),
-              const SizedBox(width: 16),
-              const Text('Custom tags:'),
-              Switch(
-                key: const ValueKey('custom-tags'),
-                value: _customTags,
-                onChanged: (v) => setState(() => _customTags = v),
-              ),
-              const SizedBox(width: 16),
-              TextButton.icon(
-                icon: const Icon(Icons.restart_alt_rounded, size: 18),
-                label: const Text('Reset'),
-                onPressed: () => _setSample(_arabic),
-              ),
+    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 4,
+        children: [
+          const Text('Sample:'),
+          DropdownButton<bool>(
+            key: const ValueKey('sample'),
+            value: _arabic,
+            underline: const SizedBox.shrink(),
+            items: const [
+              DropdownMenuItem(value: false, child: Text('English tour')),
+              DropdownMenuItem(value: true, child: Text('Arabic (RTL) tour')),
             ],
+            onChanged: (v) => _setSample(v!),
           ),
-        ),
-      );
+          const SizedBox(width: 16),
+          const Text('Text scale:'),
+          DropdownButton<double>(
+            key: const ValueKey('scale'),
+            value: _scale,
+            underline: const SizedBox.shrink(),
+            items: [
+              for (final s in _scales)
+                DropdownMenuItem(value: s, child: Text('${s}x')),
+            ],
+            onChanged: (v) => setState(() => _scale = v!),
+          ),
+          const SizedBox(width: 16),
+          const Text('TextDirection:'),
+          TextButton(
+            onPressed: _toggleTextDirection,
+            child: Text(_textDirection.name),
+          ),
+          const Text('Parser:'),
+          Switch(
+            value: _incremental,
+            onChanged: (v) => setState(() => _incremental = v),
+          ),
+          Text(_incremental ? 'plusparse' : 'legacy regex'),
+          const SizedBox(width: 16),
+          const Text(r'$…$ math:'),
+          Switch(
+            value: _useDollar,
+            onChanged: (v) => setState(() => _useDollar = v),
+          ),
+          const SizedBox(width: 16),
+          const Text('HTML:'),
+          Switch(
+            key: const ValueKey('html'),
+            value: _html,
+            onChanged: (v) => setState(() => _html = v),
+          ),
+          const SizedBox(width: 16),
+          const Text('Custom tags:'),
+          Switch(
+            key: const ValueKey('custom-tags'),
+            value: _customTags,
+            onChanged: (v) => setState(() => _customTags = v),
+          ),
+          const SizedBox(width: 16),
+          TextButton.icon(
+            icon: const Icon(Icons.restart_alt_rounded, size: 18),
+            label: const Text('Reset'),
+            onPressed: () => _setSample(_arabic),
+          ),
+        ],
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -522,9 +518,9 @@ class _ExamplePageState extends State<ExamplePage> {
           IconButton(
             tooltip: 'Maths & LaTeX demo',
             icon: const Icon(Icons.functions_rounded),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const MathPage()),
-            ),
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute<void>(builder: (_) => const MathPage())),
           ),
           IconButton(
             tooltip: 'Streaming demo',
@@ -543,9 +539,9 @@ class _ExamplePageState extends State<ExamplePage> {
           IconButton(
             tooltip: 'RTL block alignment demo',
             icon: const Icon(Icons.format_textdirection_r_to_l),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const RtlPage()),
-            ),
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute<void>(builder: (_) => const RtlPage())),
           ),
           IconButton(
             tooltip: 'maxLines demo',
@@ -578,9 +574,9 @@ class _ExamplePageState extends State<ExamplePage> {
           IconButton(
             tooltip: 'Alerts demo',
             icon: const Icon(Icons.campaign_outlined),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const AlertsPage()),
-            ),
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute<void>(builder: (_) => const AlertsPage())),
           ),
           IconButton(
             tooltip: 'HTML tags demo',
